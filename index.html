@@ -844,7 +844,7 @@ function wrapLines(x,t,max,maxLines){
   return lines.map(l=>fitText(x,l,max));
 }
 async function resultCard(T){
-  try{await Promise.all(['800 64px Unbounded','700 30px Unbounded','800 30px Manrope','700 28px Manrope'].map(f=>document.fonts.load(f)))}catch(e){}
+  try{await Promise.all(['800 64px Unbounded','700 30px Unbounded','800 30px Manrope','700 28px Manrope'].map(f=>document.fonts.load(f,'Падел турниры ABC')))}catch(e){}
   const {st}=standings(T),champs=st.filter(s=>s.p1===1),pairsF=PAIRF(T.format);
   const W=1080,P=72,rowH=72,HMAX=1400+st.length*rowH;
   const c=document.createElement('canvas');c.width=W;c.height=HMAX;const x=c.getContext('2d');
