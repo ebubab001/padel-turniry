@@ -138,7 +138,17 @@ button.mline .sc{background:#E3E8FF}
 .titem{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;width:100%;text-align:left;color:var(--ink)}
 .titem+.titem{border-top:1.5px solid var(--mist)}
 .ticon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:13px}
-.ticon.am{background:var(--court);color:var(--ball)} .ticon.mx{background:var(--coral);color:#fff}
+.ticon.am{background:var(--court);color:var(--ball)} .ticon.mx{background:var(--coral);color:#fff} .ticon.pa{background:var(--ink);color:var(--ball)}
+.pairchip{background:var(--mist);color:var(--ink);border-radius:14px;padding:8px 8px 8px 12px;display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;width:100%}
+.pairchip .num{font-family:var(--f-display);font-size:12px;color:var(--mute);flex:none}
+.pairchip .pn{flex:1;min-width:0;overflow-wrap:anywhere}
+.pairchip.half{border:2px dashed var(--silver);background:var(--paper)}
+.fmtcmp{margin-top:12px;font-size:14px}
+.fmtcmp summary{cursor:pointer;color:var(--court);font-weight:800;list-style:none}
+.fmtcmp summary::-webkit-details-marker{display:none}
+.fmtcmp .fr{padding:10px 0;border-top:1.5px solid var(--mist)}
+.fmtcmp .fr b{font-weight:800}
+.fmtcmp .fr div{color:var(--mute);font-weight:600}
 .tname{font-weight:800;font-size:16px;overflow-wrap:anywhere;line-height:1.25}
 .tmeta{font-size:13px;color:var(--mute);font-weight:600}
 .chev{color:var(--mute);font-size:22px}
@@ -172,7 +182,8 @@ button.mline .sc{background:#E3E8FF}
 <script>
 const KEY='padel-app-v3', OLD_KEY='padel-americano-app-v2';
 const SAMPLE=['Анна','Борис','Вика','Глеб','Дина','Егор','Жанна','Илья'];
-const FMT={americano:'Американо',mexicano:'Мексикано'};
+const FMT={americano:'Американо',mexicano:'Мексикано',team:'Парный американо'};
+const FMT_ICON={americano:['am','AM'],mexicano:['mx','MX'],team:['pa','PA']};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -352,6 +363,10 @@ function buildAmericanoFull(n,courts){
     best.forEach(m=>m.t1.forEach(a=>m.t2.forEach(b=>{O[a][b]++;O[b][a]++})));
     byRound.push(best);
   });
+  return assignServers(packSlots(byRound,courts,n).map(s=>withSit(s,n)),n);
+}
+/* Fit a fixed schedule onto the available courts; when there are fewer courts than matches in a round, players wait */
+function packSlots(byRound,courts,n){
   const perRound=byRound[0].length;
   let slots;
   if(courts>=perRound)slots=byRound;
@@ -365,8 +380,14 @@ function buildAmericanoFull(n,courts){
       slots.push(pick);
     }
   }
-  return assignServers(slots.map(s=>withSit(s,n)),n);
+  return slots;
 }
+/* Team Americano (round robin): fixed pairs, every pair meets every other pair exactly once */
+function buildTeamRR(pairs,n,courts){
+  const byRound=circleRounds(pairs.length).map((games,ri)=>games.map(([x,y])=>({t1:pairs[x].slice(),t2:pairs[y].slice(),r:ri})));
+  return assignServers(packSlots(byRound,courts,n).map(s=>withSit(s,n)),n);
+}
+const pairsOf=players=>{const out=[];for(let i=0;i+1<players.length;i+=2)out.push([i,i+1]);return out};
 /* Equal games, partners as varied as possible (used when "everyone with everyone" is impossible) */
 function buildEqualGames(n,courts,rounds){
   const P=zeros(n),O=zeros(n),rest=Array(n).fill(0),lastRest=Array(n).fill(-1),out=[],act=activeCount(n,courts);
@@ -421,6 +442,18 @@ function stats(T){
   const gs=new Set(st.map(s=>s.g));
   return {st,ties,unequal:gs.size>1};
 }
+/* What the leaderboard shows: players, or pairs in Team Americano (both partners always have identical numbers) */
+function standings(T){
+  const base=stats(T);
+  if(T.format!=='team')return base;
+  const by={};base.st.forEach(s=>by[s.i]=s);
+  const st=(T.pairs||pairsOf(T.players)).map(([a,b],k)=>{const s=by[a];return {i:k,name:T.players[a]+' и '+T.players[b],g:s.g,w:s.w,f:s.f,a:s.a,d:s.d}});
+  st.sort((x,y)=>y.d-x.d||y.f-x.f||x.name.localeCompare(y.name));
+  let ties=false;
+  st.forEach(s=>{const f=st.findIndex(o=>o.d===s.d);let l=f;while(l+1<st.length&&st[l+1].d===s.d)l++;
+    s.p1=f+1;s.place=f===l?String(f+1):(f+1)+'–'+(l+1);s.tie=f!==l;if(s.tie&&s.g)ties=true});
+  return {st,ties,unequal:new Set(st.map(s=>s.g)).size>1};
+}
 function validScore(T,a,b){
   const L=T.cfg.limit;
   if(a===''||b===''||a==null||b==null)return 'Введите счёт обеих пар';
@@ -434,14 +467,23 @@ function validScore(T,a,b){
 /* ================= tournament plan from setup ================= */
 let preview={key:'',rounds:null};
 function restStep(n,c){const s=n-activeCount(n,c);return s?n/gcd(n,s):1}
+function maxCourts(d){const n=d.players.length;return Math.max(1,d.format==='team'?Math.floor(Math.floor(n/2)/2):Math.floor(n/4))}
+function clampCourts(d){const m=maxCourts(d);if(d.courts>m){d.courts=m;d.rounds=null}if(d.courts<1)d.courts=1}
 function planFor(d){
+  clampCourts(d);
   const n=d.players.length,c=d.courts;
   if(n<4)return {ok:false};
+  if(d.format==='team'){
+    if(n%2)return {ok:false,odd:true};
+    const P=n/2,key='team#'+d.players.join('\u0001')+'#'+c;
+    if(preview.key!==key)preview={key,rounds:buildTeamRR(pairsOf(d.players),n,c)};
+    return {ok:true,plan:'team',total:preview.rounds.length,games:P-1,pairsN:P,perRound:Math.floor(P/2),packed:c<Math.floor(P/2)};
+  }
   const act=activeCount(n,c),step=restStep(n,c);
   const pick=def=>(d.rounds&&d.rounds%step===0)?d.rounds:def;
   if(d.format==='americano'){
     if(n%4<2){
-      const key=d.players.join('\u0001')+'#'+c;
+      const key='am#'+d.players.join('\u0001')+'#'+c;
       if(preview.key!==key)preview={key,rounds:buildAmericanoFull(n,c)};
       const perRound=Math.floor(n/4);
       return {ok:true,plan:'full',total:preview.rounds.length,games:n-1,act,usedCourts:Math.min(c,perRound),perRound,packed:c<perRound};
@@ -472,10 +514,10 @@ function renderHome(app){
   const active=all.filter(t=>t.status==='active').sort((a,b)=>b.updatedAt-a.updatedAt);
   const done=all.filter(t=>t.status==='finished').sort((a,b)=>(b.finishedAt||0)-(a.finishedAt||0));
   const item=(t,act)=>{
-    const champ=t.status==='finished'?stats(t).st.filter(s=>s.p1===1).map(s=>s.name).join(' и '):'';
+    const champ=t.status==='finished'?standings(t).st.filter(s=>s.p1===1).map(s=>s.name).join(t.format==='team'?', ':' и '):'';
     const meta=act?`${t.stage==='results'?'Все игры сыграны — завершите турнир':`Раунд ${t.round+1} из ${t.cfg.total}`} · ${t.players.length} игроков`
       :`${dateRu(t.finishedAt||t.createdAt)} · ${t.players.length} игроков · 🏆 ${esc(champ)}`;
-    return `<button class="titem" data-a="open" data-id="${t.id}"><span class="ticon ${t.format==='mexicano'?'mx':'am'}">${t.format==='mexicano'?'MX':'AM'}</span>
+    return `<button class="titem" data-a="open" data-id="${t.id}"><span class="ticon ${(FMT_ICON[t.format]||FMT_ICON.americano)[0]}">${(FMT_ICON[t.format]||FMT_ICON.americano)[1]}</span>
       <span style="min-width:0"><span class="tname" style="display:block">${esc(t.name)}</span><span class="tmeta">${FMT[t.format]} · ${meta}</span></span><span class="chev">›</span></button>`;
   };
   app.innerHTML=`
@@ -493,15 +535,30 @@ function renderHome(app){
 
 function renderSetup(app){
   const d=store.draft,n=d.players.length,P=planFor(d);
-  const fmtSeg=`<div class="seg three">
+  const fmtSeg=`<div class="seg">
     <button data-a="fmt" data-v="americano" class="${d.format==='americano'?'on':''}">Американо</button>
     <button data-a="fmt" data-v="mexicano" class="${d.format==='mexicano'?'on':''}">Мексикано</button>
-    <button class="soon" disabled>Фаст<br><small>скоро</small></button></div>`;
-  const fmtNote=d.format==='americano'
-    ?'Партнёры меняются каждый раунд по заранее составленной сетке. Места — по Δ.'
-    :'1-й раунд — случайные пары. Дальше пары составляются по текущей таблице: сильные играют с сильными. Места — по Δ.';
+    <button data-a="fmt" data-v="team" class="${d.format==='team'?'on':''}">Парный американо</button>
+    <button class="soon" disabled>Фаст американо<br><small>скоро</small></button></div>`;
+  const fmtNote={
+    americano:'Партнёры меняются каждый раунд: каждый сыграет в паре с каждым. Зачёт личный, места — по Δ.',
+    mexicano:'1-й раунд — пары по жребию. Дальше пары составляются по текущей таблице: сильные играют с сильными. Зачёт личный, места — по Δ.',
+    team:'Пары постоянные на весь турнир. Каждая пара сыграет с каждой другой парой по одному разу (раунд робин). Зачёт по парам, места — по Δ пары.'
+  }[d.format];
+  const fmtCompare=`<details class="fmtcmp"><summary>Чем отличаются форматы ›</summary>
+    <div class="fr"><b>Американо</b><div>Пришли поодиночке. Партнёр новый каждый раунд, у каждого свой личный зачёт. Подходит для смешанного уровня и вечеров для общения.</div></div>
+    <div class="fr"><b>Мексикано</b><div>Пришли поодиночке, но уровень сильно разный. Пары собираются по таблице, поэтому игры ровнее и азартнее. Личный зачёт.</div></div>
+    <div class="fr"><b>Парный американо</b><div>Пришли своими парами. Пара не меняется весь турнир, играет против всех остальных пар. Побеждает пара, а не один игрок.</div></div>
+  </details>`;
   let roundsBlock='';
-  if(!P.ok)roundsBlock=`<div class="info">Добавьте минимум 4 игроков — тогда появится расчёт раундов</div>`;
+  if(!P.ok)roundsBlock=P.odd?`<div class="warn"><b>Нужно чётное число игроков</b> — в парном американо каждый игрок в паре. Сейчас ${n}: добавьте или уберите одного.</div>`
+    :`<div class="info">Добавьте минимум 4 игроков — тогда появится расчёт раундов</div>`;
+  else if(P.plan==='team'){
+    roundsBlock=`<div class="row"><div><div style="font-weight:800">Раунды</div><div class="hint" style="margin:0">Фиксировано форматом</div></div><span class="fixed">${P.total}</span></div>
+      <div class="info">${IC.check} ${P.pairsN} ${plural(P.pairsN,'пара','пары','пар')}: каждая сыграет с каждой <b>ровно 1 раз</b>, у всех по <b>${P.games}</b> ${plural(P.games,'игре','игры','игр')}.
+      ${P.pairsN%2?'<br>Пар нечётное число — в каждом раунде одна пара отдыхает, каждая по одному разу.':''}
+      ${P.packed?`<br>Кортов меньше максимума (${P.perRound}) — часть пар ждёт, но у всех всё равно по ${P.games} ${plural(P.games,'игре','игры','игр')}.`:''}</div>`;
+  }
   else if(P.plan==='full'){
     roundsBlock=`<div class="row"><div><div style="font-weight:800">Раунды</div><div class="hint" style="margin:0">Фиксировано форматом</div></div><span class="fixed">${P.total}</span></div>
       <div class="info">${IC.check} Каждый сыграет с каждым в паре <b>ровно 1 раз</b>. У всех по <b>${P.games}</b> ${plural(P.games,'игре','игры','игр')}, поэтому очки сравнимы честно.
@@ -526,14 +583,19 @@ function renderSetup(app){
       <div class="label" style="margin-top:16px">Формат</div>
       ${fmtSeg}
       <div class="hint">${fmtNote}</div>
+      ${fmtCompare}
     </section>
     <section class="card">
-      <div class="row" style="margin-bottom:10px"><div class="label" style="margin:0">Участники · ${n}</div>
+      <div class="row" style="margin-bottom:10px"><div class="label" style="margin:0">${d.format==='team'?`Пары · ${Math.floor(n/2)}${n%2?' + 1 игрок':''}`:`Участники · ${n}`}</div>
         ${n?`<button class="textbtn" data-a="clear" style="padding:0">${d.sample?'Убрать пример':'Очистить'}</button>`:''}</div>
       ${d.sample?'<div class="hint" style="margin:0 0 10px">Это пример — замените своими игроками</div>':''}
-      <div class="chips">${d.players.map((p,i)=>`<span class="chip">${esc(p)}<button class="x" data-a="rm" data-i="${i}" aria-label="Удалить ${esc(p)}">✕</button></span>`).join('')||'<span class="hint" style="margin:0">Добавьте минимум 4 игроков</span>'}</div>
-      <form class="addbox" id="addform"><input class="textin" id="newname" placeholder="Имя игрока" autocomplete="off" enterkeyhint="done" aria-label="Имя игрока"><button type="submit" aria-label="Добавить">+</button></form>
-      <div class="hint">Можно вставить сразу список — через запятую или с новой строки</div>
+      ${d.format==='team'?`<div class="stack" style="gap:8px">${(()=>{const out=[];for(let i=0;i<n;i+=2){const a=d.players[i],b=d.players[i+1];
+          out.push(`<div class="pairchip ${b==null?'half':''}"><span class="num">${i/2+1}</span><span class="pn">${esc(a)} + ${b==null?'<span style="color:var(--mute)">ждёт партнёра</span>':esc(b)}</span><button class="x" data-a="rmpair" data-i="${i}" aria-label="Удалить пару">✕</button></div>`)}
+          return out.join('')||'<span class="hint" style="margin:0">Добавьте минимум 2 пары</span>'})()}</div>
+        ${n>=4?'<button class="textbtn" data-a="shufflepairs">Перемешать пары случайно</button>':''}`
+      :`<div class="chips">${d.players.map((p,i)=>`<span class="chip">${esc(p)}<button class="x" data-a="rm" data-i="${i}" aria-label="Удалить ${esc(p)}">✕</button></span>`).join('')||'<span class="hint" style="margin:0">Добавьте минимум 4 игроков</span>'}</div>`}
+      <form class="addbox" id="addform"><input class="textin" id="newname" placeholder="${d.format==='team'?'Анна + Борис':'Имя игрока'}" autocomplete="off" enterkeyhint="done" aria-label="Имя игрока"><button type="submit" aria-label="Добавить">+</button></form>
+      <div class="hint">${d.format==='team'?'Вводите пару через «+»: Анна + Борис. Или по одному имени — пары собираются по порядку.':'Можно вставить сразу список — через запятую или с новой строки'}</div>
       <div class="err" id="e-names"></div>
     </section>
     <section class="card">
@@ -553,7 +615,7 @@ function renderSetup(app){
       </div>`:''}
     </section>
     <section class="card">
-      <div class="row"><div><div style="font-weight:800">Корты</div>${P.ok&&P.act/4<d.courts?`<div class="hint" style="margin:0">Нужно только ${P.act/4}</div>`:''}</div>
+      <div class="row"><div><div style="font-weight:800">Корты</div>${n>=4?`<div class="hint" style="margin:0">${d.courts>=maxCourts(d)?`Максимум для ${n} ${plural(n,'игрока','игроков','игроков')}`:`Максимум ${maxCourts(d)} — сейчас часть ${d.format==='team'?'пар':'игроков'} будет ждать`}</div>`:''}</div>
         <div class="stepper"><button data-a="cstep" data-d="-1" aria-label="Меньше кортов">−</button><span class="val">${d.courts}</span><button data-a="cstep" data-d="1" aria-label="Больше кортов">+</button></div></div>
       <div class="row" style="display:block">${roundsBlock}</div>
       <div class="err" id="e-cfg"></div>
@@ -562,7 +624,7 @@ function renderSetup(app){
   </div>`;
   const f=$('#addform'),inp=$('#newname');
   f.addEventListener('submit',e=>{e.preventDefault();addNames(inp.value)});
-  inp.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text')||'';if(/[\n,;]/.test(t)){e.preventDefault();addNames(t)}});
+  inp.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text')||'';if(/[\n,;+\/]/.test(t)){e.preventDefault();addNames(t)}});
   inp.addEventListener('input',()=>{$('#e-names').textContent=''});
   $('#f-name').addEventListener('input',e=>{d.name=e.target.value;saveLocal()});
 }
@@ -570,7 +632,7 @@ function defaultName(d){return `${FMT[d.format]} · ${dateRu(Date.now())}`}
 
 function addNames(text){
   const d=store.draft;if(d.sample){d.players=[];d.sample=false}
-  const list=text.split(/[\n,;]+/).map(s=>s.trim()).filter(Boolean);
+  const list=text.split(d.format==='team'?/[\n,;+\/]+/:/[\n,;]+/).map(s=>s.trim()).filter(Boolean);
   if(!list.length){$('#e-names').textContent='Введите имя';return}
   const skipped=[];
   list.forEach(n=>{if(d.players.some(p=>p.toLowerCase()===n.toLowerCase()))skipped.push(n);else d.players.push(n.slice(0,40))});
@@ -582,11 +644,13 @@ function startTournament(){
   const d=store.draft,n=d.players.length;
   if(n<4){$('#e-names').textContent='Нужно минимум 4 игрока';$('#e-names').scrollIntoView({block:'center',behavior:'smooth'});return}
   if(n>40){$('#e-names').textContent='Максимум 40 игроков';return}
+  if(d.format==='team'&&n%2){$('#e-names').textContent='Нужно чётное число игроков — у одного нет пары';$('#e-names').scrollIntoView({block:'center',behavior:'smooth'});return}
   const P=planFor(d),id=newId();
   const T={id,name:(d.name.trim()||defaultName(d)).slice(0,60),format:d.format,players:d.players.slice(),
     cfg:{limit:d.limit,mode:d.mode,courts:d.courts,scheme:d.scheme||'13',plan:P.plan,total:P.total},
     rounds:[],round:0,stage:'play',status:'active',createdAt:Date.now(),updatedAt:Date.now()};
-  if(P.plan==='full')T.rounds=clone(preview.rounds);
+  if(P.plan==='full'||P.plan==='team')T.rounds=clone(preview.rounds);
+  if(P.plan==='team')T.pairs=pairsOf(T.players);
   else if(P.plan==='equal')T.rounds=buildEqualGames(n,d.courts,P.total);
   else T.rounds=[mexicanoRound(T)];
   T.cfg.total=P.plan==='mex'?P.total:T.rounds.length;
@@ -615,7 +679,7 @@ function header(T,title){
 }
 function renderTournament(app,T){
   const t=store.ui.tab;
-  if(t==='table'){const {st,ties,unequal}=stats(T);app.innerHTML=`${header(T,'<h1 class="big" style="margin-top:14px">Таблица</h1>')}<div class="stack" style="margin-top:14px">${leaderboard(T,st,ties,unequal)}</div>`;return}
+  if(t==='table'){const {st,ties,unequal}=standings(T);app.innerHTML=`${header(T,'<h1 class="big" style="margin-top:14px">Таблица</h1>')}<div class="stack" style="margin-top:14px">${leaderboard(T,st,ties,unequal)}</div>`;return}
   if(t==='grid')return renderGrid(app,T);
   if(T.stage==='results')return renderResults(app,T);
   renderPlay(app,T);
@@ -666,7 +730,7 @@ function setScore(T,k,s,v,fromBtn){
 function leaderboard(T,st,ties,unequal){
   const any=st.some(s=>s.g);
   return `<section class="card">
-    <div class="row" style="margin-bottom:4px"><div class="label" style="margin:0">Игрок</div><div class="label" style="margin:0">Δ</div></div>
+    <div class="row" style="margin-bottom:4px"><div class="label" style="margin:0">${T.format==='team'?'Пара':'Игрок'}</div><div class="label" style="margin:0">Δ</div></div>
     ${st.map(s=>`<div class="lb-row">
       <span class="place ${any&&s.p1<=3?'p'+s.p1:''} ${s.tie?'tie':''}">${any?s.place:'—'}</span>
       <div style="min-width:0"><div class="lb-name">${esc(s.name)}</div>
@@ -698,11 +762,11 @@ function podiumHTML(st){
       <div class="blk" style="height:${h[i]}px;background:${bg[Math.min(s.p1,3)-1]}"><span>${s.place}</span><small>Δ ${fmtD(s.d)}</small></div></div>`}).join('')}</div>`;
 }
 function renderResults(app,T){
-  const {st,ties,unequal}=stats(T);const champs=st.filter(s=>s.p1===1);
+  const {st,ties,unequal}=standings(T);const champs=st.filter(s=>s.p1===1);
   app.innerHTML=`${header(T,'')}
   <div class="eyebrow" style="margin-top:14px">${unequal?'Турнир остановлен досрочно':'Все игры сыграны'}</div>
-  <div class="sub" style="margin-top:8px">${champs.length>1?'Чемпионы':'Чемпион'}</div>
-  <div class="champ">${champs.map(s=>esc(s.name)).join(' и ')}</div>
+  <div class="sub" style="margin-top:8px">${T.format==='team'||champs.length>1?'Чемпионы':'Чемпион'}</div>
+  <div class="champ">${champs.map(s=>esc(s.name)).join(T.format==='team'?', ':' и ')}</div>
   <div class="sub">Δ ${fmtD(st[0].d)} · ${st[0].f}:${st[0].a}</div>
   <section class="card pop" style="margin-top:18px;padding-bottom:0;overflow:hidden">${podiumHTML(st)}</section>
   <div class="stack" style="margin-top:14px">
@@ -713,12 +777,12 @@ function renderResults(app,T){
   if(!T.celebrated){T.celebrated=true;touch(T);confetti()}
 }
 function renderArchived(app,T){
-  const {st,ties,unequal}=stats(T);const champs=st.filter(s=>s.p1===1);
+  const {st,ties,unequal}=standings(T);const champs=st.filter(s=>s.p1===1);
   app.innerHTML=`<div class="topbar"><button class="iconbtn" data-a="home" aria-label="На главную">${IC.home}</button>
     <div style="flex:1"></div><button class="iconbtn" data-a="amenu" aria-label="Действия">${IC.dots}</button></div>
   <div class="eyebrow" style="margin-top:14px">${FMT[T.format]} · ${dateRu(T.finishedAt||T.createdAt)} · завершён</div>
   <h1 class="big">${esc(T.name)}</h1>
-  <div class="sub">${champs.length>1?'Чемпионы':'Чемпион'}: <b style="color:var(--ball)">${champs.map(s=>esc(s.name)).join(' и ')}</b></div>
+  <div class="sub">${T.format==='team'||champs.length>1?'Чемпионы':'Чемпион'}: <b style="color:var(--ball)">${champs.map(s=>esc(s.name)).join(T.format==='team'?', ':' и ')}</b></div>
   <section class="card" style="margin-top:18px;padding-bottom:0;overflow:hidden">${podiumHTML(st)}</section>
   <div class="stack" style="margin-top:14px">
     ${leaderboard(T,st,ties,unequal)}
@@ -769,7 +833,7 @@ function reopenMatch(T,ri,k){
   setTimeout(()=>{const el=$('#court-'+k);el&&el.scrollIntoView({behavior:'smooth',block:'center'})},50);
 }
 function copyResults(T){
-  const {st}=stats(T);
+  const {st}=standings(T);
   const txt=`${T.name} (${FMT[T.format]}, ${dateRu(T.finishedAt||T.createdAt)})\n`+st.map(s=>`${s.place}. ${s.name} — Δ ${fmtD(s.d)} (${s.f}:${s.a}, игр ${s.g})`).join('\n');
   const manual=()=>{sheet('Итоги турнира','Выделите текст и скопируйте его.',[],`<textarea id="copy-area" readonly style="width:100%;height:220px;border-radius:14px;border:2px solid var(--mist);padding:10px;font:600 14px/1.4 var(--f-body);color:var(--ink);background:var(--paper)">${esc(txt)}</textarea>`);const ta=$('#copy-area');if(ta){ta.focus();ta.select()}};
   if(TG){
@@ -791,12 +855,14 @@ document.addEventListener('click',e=>{
     case 'open':{const t=store.tournaments[b.dataset.id];return go(t.status==='finished'?'view':'play',t.id,'play')}
     case 'fmt':d.format=b.dataset.v;d.rounds=null;saveLocal();return render();
     case 'rm':d.players.splice(+b.dataset.i,1);d.sample=false;saveLocal();return render();
+    case 'rmpair':d.players.splice(+b.dataset.i,2);d.sample=false;saveLocal();return render();
+    case 'shufflepairs':d.players=shuffle(d.players);d.sample=false;buzz();saveLocal();return render();
     case 'clear':d.players=[];d.sample=false;saveLocal();render();return $('#newname').focus();
     case 'limit':d.limit=+b.dataset.v;saveLocal();return render();
     case 'lstep':d.limit=Math.min(99,Math.max(1,d.limit+ +b.dataset.d));buzz();saveLocal();return render();
     case 'mode':d.mode=b.dataset.v;saveLocal();return render();
     case 'scheme':d.scheme=b.dataset.v;saveLocal();return render();
-    case 'cstep':d.courts=Math.min(20,Math.max(1,d.courts+ +b.dataset.d));d.rounds=null;buzz();saveLocal();return render();
+    case 'cstep':d.courts=Math.min(maxCourts(d),Math.max(1,d.courts+ +b.dataset.d));d.rounds=null;buzz();saveLocal();return render();
     case 'rstep':{const P=planFor(d);if(!P.ok)return;d.rounds=Math.min(Math.max(P.step,Math.floor(60/P.step)*P.step),Math.max(P.step,P.total+ +b.dataset.d*P.step));buzz();saveLocal();return render()}
     case 'start':return startTournament();
     case 'tab':store.ui.tab=b.dataset.v;saveLocal();render();return scrollTo(0,0);
