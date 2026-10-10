@@ -806,6 +806,7 @@ function renderResults(app,T){
   <div class="stack" style="margin-top:14px">
     ${leaderboard(T,st,ties,unequal)}
     <button class="cta" data-a="finishT">${IC.check} Завершить турнир</button>
+    <button class="ghost" data-a="share">Поделиться результатом</button>
     <div class="rest" style="justify-content:center">Турнир сохранится в завершённых. Ошибку в счёте можно исправить во вкладке «Сетка».</div>
   </div>`;
   if(!T.celebrated){T.celebrated=true;touch(T);confetti()}
@@ -823,8 +824,79 @@ function renderArchived(app,T){
     <section class="card"><div class="label">Все матчи</div>
       ${T.rounds.map((r,i)=>`<div class="hint" style="margin:10px 0 2px">Раунд ${i+1}</div>`+r.matches.map(m=>`<div class="mline"><span>${m.t1.map(p=>esc(T.players[p])).join(' / ')}</span><span class="sc ${m.done?'':'pending'}">${m.done?m.s1+':'+m.s2:'—'}</span><span class="r">${m.t2.map(p=>esc(T.players[p])).join(' / ')}</span></div>`).join('')).join('')}
     </section>
-    <button class="cta" data-a="copy">${TG?'Отправить итоги в чат':'Скопировать итоги'}</button>
+    <button class="cta" data-a="share">Поделиться результатом</button>
   </div>`;
+}
+
+/* ================= share card: results as a picture ================= */
+function rrect(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()}
+function fitText(x,t,max){if(x.measureText(t).width<=max)return t;while(t.length>1&&x.measureText(t+'…').width>max)t=t.slice(0,-1);return t+'…'}
+function wrapLines(x,t,max,maxLines){
+  const words=String(t).split(/\s+/),lines=[];let line='';
+  words.forEach(w=>{const tryL=line?line+' '+w:w;if(x.measureText(tryL).width<=max||!line)line=tryL;else{lines.push(line);line=w}});
+  if(line)lines.push(line);
+  if(lines.length>maxLines){const keep=lines.slice(0,maxLines);keep[maxLines-1]=fitText(x,keep[maxLines-1]+' '+lines.slice(maxLines).join(' '),max);return keep}
+  return lines.map(l=>fitText(x,l,max));
+}
+async function resultCard(T){
+  try{await Promise.all(['800 64px Unbounded','700 30px Unbounded','800 30px Manrope','700 28px Manrope'].map(f=>document.fonts.load(f)))}catch(e){}
+  const {st}=standings(T),champs=st.filter(s=>s.p1===1),pairsF=PAIRF(T.format);
+  const W=1080,P=72,rowH=72,HMAX=1400+st.length*rowH;
+  const c=document.createElement('canvas');c.width=W;c.height=HMAX;const x=c.getContext('2d');
+  const C={court:'#1638E8',ball:'#DFFF2F',ink:'#0A1240',paper:'#FFFFFF',mist:'#EEF1FF',mute:'#6A72A6',gold:'#FFC93C',silver:'#C9D0E6',bronze:'#F0A36B',posBg:'#DDF7EA',posFg:'#0B7A47',negBg:'#FFE5E2',negFg:'#C2281B'};
+  const D='"Unbounded","Arial Black",sans-serif',B='"Manrope",-apple-system,sans-serif';
+  x.fillStyle=C.court;x.fillRect(0,0,W,HMAX);
+  x.fillStyle='rgba(255,255,255,.10)';x.fillRect(W/2-3,0,6,HMAX);x.fillRect(0,420,W,6);x.fillRect(0,HMAX*.62,W,6);
+  let y=118;
+  x.fillStyle=C.ball;x.font='800 28px '+B;x.fillText('ПАДЕЛ · ИТОГИ ТУРНИРА',P,y);
+  x.fillStyle=C.paper;x.font='800 60px '+D;
+  wrapLines(x,T.name,W-2*P,2).forEach(l=>{y+=78;x.fillText(l,P,y)});
+  y+=58;x.fillStyle='rgba(255,255,255,.82)';x.font='700 30px '+B;
+  x.fillText(fitText(x,`${FMT[T.format]} · ${dateRu(T.finishedAt||T.createdAt)} · до ${T.cfg.limit}`,W-2*P),P,y);
+  y+=92;x.fillStyle=C.ball;x.font='800 28px '+B;x.fillText(pairsF||champs.length>1?'ЧЕМПИОНЫ':'ЧЕМПИОН',P,y);
+  x.font='800 66px '+D;
+  wrapLines(x,champs.map(s=>s.name).join(pairsF?', ':' и '),W-2*P,2).forEach(l=>{y+=84;x.fillText(l,P,y)});
+  y+=48;x.fillStyle='rgba(255,255,255,.82)';x.font='700 30px '+B;x.fillText(`Δ ${fmtD(st[0].d)} · ${st[0].f}:${st[0].a}`,P,y);
+  /* podium */
+  y+=50;const podTop=y,podH=430;
+  x.fillStyle=C.paper;rrect(x,P,podTop,W-2*P,podH,40);x.fill();
+  const top=st.slice(0,3),gap=24,bw=(W-2*P-2*40-2*gap)/3,hs=[250,190,140],cols=[C.gold,C.silver,C.bronze];
+  [1,0,2].forEach((i,slot)=>{const s=top[i];if(!s)return;
+    const bx=P+40+slot*(bw+gap),bh=hs[i],by=podTop+podH-30-bh;
+    x.fillStyle=cols[Math.min(s.p1,3)-1];rrect(x,bx,by,bw,bh,26);x.fill();
+    x.fillStyle=C.ink;x.textAlign='center';x.font='800 54px '+D;x.fillText(s.place,bx+bw/2,by+72);
+    x.font='800 26px '+B;x.fillText('Δ '+fmtD(s.d),bx+bw/2,by+112);
+    x.font='800 28px '+B;wrapLines(x,s.name,bw,2).reverse().forEach((l,li)=>x.fillText(l,bx+bw/2,by-20-li*34));
+    x.textAlign='left'});
+  /* table */
+  y=podTop+podH+36;const tTop=y,tH=90+st.length*rowH+30;
+  x.fillStyle=C.paper;rrect(x,P,tTop,W-2*P,tH,40);x.fill();
+  x.fillStyle=C.mute;x.font='800 24px '+B;x.fillText(pairsF?'ПАРА':'ИГРОК',P+40,tTop+62);x.textAlign='right';x.fillText('Δ',W-P-40,tTop+62);x.textAlign='left';
+  st.forEach((s,k)=>{const ry=tTop+90+k*rowH;
+    if(k){x.fillStyle=C.mist;x.fillRect(P+40,ry,W-2*P-80,3)}
+    const bc=s.p1<=3?cols[s.p1-1]:C.mist;x.fillStyle=bc;rrect(x,P+40,ry+12,52,48,14);x.fill();
+    x.fillStyle=C.ink;x.textAlign='center';x.font=(s.tie?'800 17px ':'800 22px ')+D;x.fillText(s.place,P+66,ry+44);x.textAlign='left';
+    x.font='800 30px '+B;x.fillText(fitText(x,s.name,W-2*P-420),P+112,ry+46);
+    x.fillStyle=C.mute;x.font='700 24px '+B;x.textAlign='right';x.fillText(`${s.f}:${s.a}`,W-P-180,ry+45);
+    const pos=s.d>0,neg=s.d<0;x.fillStyle=pos?C.posBg:neg?C.negBg:C.mist;rrect(x,W-P-40-120,ry+12,120,48,14);x.fill();
+    x.fillStyle=pos?C.posFg:neg?C.negFg:C.mute;x.textAlign='center';x.font='800 24px '+D;x.fillText(fmtD(s.d),W-P-40-60,ry+45);x.textAlign='left'});
+  y=tTop+tH+70;
+  x.fillStyle='rgba(255,255,255,.75)';x.font='700 26px '+B;x.fillText('Места — по Δ (забито − пропущено)',P,y);
+  const H=y+56,out=document.createElement('canvas');out.width=W;out.height=H;out.getContext('2d').drawImage(c,0,0);
+  return await new Promise(res=>out.toBlob(b=>res(b),'image/png'));
+}
+async function shareResults(T){
+  toast('Готовлю картинку…');
+  let blob=null;try{blob=await resultCard(T)}catch(e){}
+  if(!blob)return copyResults(T);
+  const file=new File([blob],'padel-itogi.png',{type:'image/png'});
+  const url=URL.createObjectURL(blob);
+  let canShare=false;try{canShare=!!(navigator.canShare&&navigator.canShare({files:[file]}))}catch(e){}
+  const acts=[];
+  if(canShare)acts.push({label:'Поделиться картинкой',kind:'primary',run:()=>{navigator.share({files:[file],title:T.name}).catch(()=>{})}});
+  acts.push({label:TG?'Отправить текстом в Telegram':'Скопировать текстом',run:()=>copyResults(T)});
+  sheet('Итоги турнира',canShare?'Выберите Telegram и свой канал — или сохраните картинку в «Фото».':'Нажмите на картинку и удерживайте, чтобы сохранить её, затем опубликуйте в канале.',acts,
+    `<img src="${url}" alt="Итоги турнира ${esc(T.name)}" style="width:100%;border-radius:16px;margin-bottom:8px;display:block;-webkit-touch-callout:default">`);
 }
 
 /* ================= sheet / toast ================= */
@@ -928,6 +1000,7 @@ document.addEventListener('click',e=>{
       {label:'Вернуть в активные',run:()=>{T.status='active';T.finishedAt=null;touch(T);go('play',T.id,'grid')}},
       {label:'Удалить турнир',kind:'danger',run:()=>sheet('Удалить турнир?','Результаты будут удалены без возможности восстановить.',[{label:'Удалить',kind:'danger',run:()=>deleteT(T)}])}]);
     case 'copy':return copyResults(T);
+    case 'share':return shareResults(T);
     case 'closesheet':return closeSheet();
   }
 });
