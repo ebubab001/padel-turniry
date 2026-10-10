@@ -133,7 +133,7 @@ button.mline .sc{background:#E3E8FF}
 .titem{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;width:100%;text-align:left;color:var(--ink)}
 .titem+.titem{border-top:1.5px solid var(--mist)}
 .ticon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:13px}
-.ticon.am{background:var(--court);color:var(--ball)} .ticon.mx{background:var(--coral);color:#fff} .ticon.pa{background:var(--ink);color:var(--ball)}
+.ticon.am{background:var(--court);color:var(--ball)} .ticon.mx{background:var(--coral);color:#fff} .ticon.pa{background:var(--ink);color:var(--ball)} .ticon.pm{background:var(--ink);color:var(--coral)}
 .pairchip{background:var(--mist);color:var(--ink);border-radius:14px;padding:8px 8px 8px 12px;display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;width:100%}
 .pairchip .num{font-family:var(--f-display);font-size:12px;color:var(--mute);flex:none}
 .pairchip .pn{flex:1;min-width:0;overflow-wrap:anywhere}
@@ -177,8 +177,9 @@ button.mline .sc{background:#E3E8FF}
 <script>
 const KEY='padel-app-v3', OLD_KEY='padel-americano-app-v2';
 const SAMPLE=['Анна','Борис','Вика','Глеб','Дина','Егор','Жанна','Илья'];
-const FMT={americano:'Американо',mexicano:'Мексикано',team:'Парный американо'};
-const FMT_ICON={americano:['am','AM'],mexicano:['mx','MX'],team:['pa','PA']};
+const FMT={americano:'Американо',mexicano:'Мексикано',team:'Парный американо',teammex:'Парный мексикано'};
+const FMT_ICON={americano:['am','AM'],mexicano:['mx','MX'],team:['pa','PA'],teammex:['pm','PM']};
+const PAIRF=f=>f==='team'||f==='teammex', MEXF=f=>f==='mexicano'||f==='teammex';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -204,7 +205,7 @@ const IC={
 };
 
 /* ================= storage: phone first, cloud copy when available ================= */
-function freshDraft(){return {name:'',format:'americano',players:SAMPLE.slice(),sample:true,limit:24,mode:'sum',courts:2,rounds:null,scheme:'13'}}
+function freshDraft(){return {name:'',format:'americano',players:SAMPLE.slice(),sample:true,limit:24,mode:'sum',courts:2,rounds:null,scheme:'13',cycles:1}}
 function freshStore(){return {tournaments:{},draft:freshDraft(),ui:{screen:'home',id:null,tab:'play'},unsynced:[]}}
 let store;
 function loadLocal(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
@@ -378,8 +379,9 @@ function packSlots(byRound,courts,n){
   return slots;
 }
 /* Team Americano (round robin): fixed pairs, every pair meets every other pair exactly once */
-function buildTeamRR(pairs,n,courts){
-  const byRound=circleRounds(pairs.length).map((games,ri)=>games.map(([x,y])=>({t1:pairs[x].slice(),t2:pairs[y].slice(),r:ri})));
+function buildTeamRR(pairs,n,courts,cycles){
+  const byRound=[];
+  for(let c=0;c<(cycles||1);c++)circleRounds(pairs.length).forEach(games=>{const r=byRound.length;byRound.push(games.map(([x,y])=>({t1:pairs[x].slice(),t2:pairs[y].slice(),r})))});
   return assignServers(packSlots(byRound,courts,n).map(s=>withSit(s,n)),n);
 }
 const pairsOf=players=>{const out=[];for(let i=0;i+1<players.length;i+=2)out.push([i,i+1]);return out};
@@ -402,7 +404,33 @@ function buildEqualGames(n,courts,rounds){
   return assignServers(out,n);
 }
 /* Mexicano: round 1 random, then by current standings in blocks of four */
+/* Team Mexicano: fixed pairs; round 1 random, then pairs with close standings meet (avoiding an immediate rematch when possible) */
+function teamMexRound(T){
+  const n=T.players.length,pairs=T.pairs,P=pairs.length,prev=T.rounds;
+  const playN=2*Math.min(T.cfg.courts,Math.floor(P/2));
+  const rest=Array(P).fill(0),lastRest=Array(P).fill(-1),serves=Array(n).fill(0),lastOpp=Array(P).fill(-1);
+  const pairOf={};pairs.forEach(([a,b],k)=>{pairOf[a]=k;pairOf[b]=k});
+  prev.forEach((R,ri)=>{pairs.forEach(([a],k)=>{if(R.sit.includes(a)){rest[k]++;lastRest[k]=ri}});R.matches.forEach(m=>serves[m.server]++)});
+  if(prev.length)prev[prev.length-1].matches.forEach(m=>{const x=pairOf[m.t1[0]],y=pairOf[m.t2[0]];lastOpp[x]=y;lastOpp[y]=x});
+  const order=shuffle([...Array(P).keys()]).sort((a,b)=>rest[a]-rest[b]||lastRest[a]-lastRest[b]);
+  const sitP=order.slice(0,P-playN),playing=new Set(order.slice(P-playN));
+  const ranked=prev.length?standings(T).st.map(s=>s.i).filter(k=>playing.has(k)):shuffle([...playing]);
+  for(let k=0;k+3<ranked.length;k+=2)if(lastOpp[ranked[k]]===ranked[k+1]){const t=ranked[k+1];ranked[k+1]=ranked[k+2];ranked[k+2]=t}
+  if(ranked.length>=4){const k=ranked.length-2;if(lastOpp[ranked[k]]===ranked[k+1]){const t=ranked[k];ranked[k]=ranked[k-1];ranked[k-1]=t}}
+  const matches=[];
+  for(let k=0;k+1<ranked.length;k+=2){
+    const m={t1:pairs[ranked[k]].slice(),t2:pairs[ranked[k+1]].slice()};
+    const four=shuffle(m.t1.concat(m.t2)).sort((p,q)=>serves[p]-serves[q]);
+    m.server=four[0];serves[four[0]]++;
+    if(!m.t1.includes(m.server)){const t=m.t1;m.t1=m.t2;m.t2=t}
+    if(m.t1[1]===m.server)m.t1.reverse();
+    m.s1='';m.s2='';m.done=false;matches.push(m);
+  }
+  const sit=[];sitP.forEach(k=>sit.push(...pairs[k]));
+  return {matches,sit};
+}
 function mexicanoRound(T){
+  if(T.format==='teammex')return teamMexRound(T);
   const n=T.players.length,act=activeCount(n,T.cfg.courts),prev=T.rounds;
   const rest=Array(n).fill(0),lastRest=Array(n).fill(-1),serves=Array(n).fill(0);
   prev.forEach((R,ri)=>{R.sit.forEach(p=>{rest[p]++;lastRest[p]=ri});R.matches.forEach(m=>serves[m.server]++)});
@@ -440,7 +468,7 @@ function stats(T){
 /* What the leaderboard shows: players, or pairs in Team Americano (both partners always have identical numbers) */
 function standings(T){
   const base=stats(T);
-  if(T.format!=='team')return base;
+  if(!PAIRF(T.format))return base;
   const by={};base.st.forEach(s=>by[s.i]=s);
   const st=(T.pairs||pairsOf(T.players)).map(([a,b],k)=>{const s=by[a];return {i:k,name:T.players[a]+' и '+T.players[b],g:s.g,w:s.w,f:s.f,a:s.a,d:s.d}});
   st.sort((x,y)=>y.d-x.d||y.f-x.f||x.name.localeCompare(y.name));
@@ -462,17 +490,22 @@ function validScore(T,a,b){
 /* ================= tournament plan from setup ================= */
 let preview={key:'',rounds:null};
 function restStep(n,c){const s=n-activeCount(n,c);return s?n/gcd(n,s):1}
-function maxCourts(d){const n=d.players.length;return Math.max(1,d.format==='team'?Math.floor(Math.floor(n/2)/2):Math.floor(n/4))}
-function clampCourts(d){const m=maxCourts(d);if(d.courts>m){d.courts=m;d.rounds=null}if(d.courts<1)d.courts=1}
+function maxCourts(d){const n=d.players.length;return Math.max(1,PAIRF(d.format)?Math.floor(Math.floor(n/2)/2):Math.floor(n/4))}
+/* The coach's chosen courts stay as set; what is used is capped by what the current players can fill */
+function effCourts(d){return Math.max(1,Math.min(d.courts||1,maxCourts(d)))}
 function planFor(d){
-  clampCourts(d);
-  const n=d.players.length,c=d.courts;
+  const n=d.players.length,c=effCourts(d);
   if(n<4)return {ok:false};
+  if(PAIRF(d.format)&&n%2)return {ok:false,odd:true};
   if(d.format==='team'){
-    if(n%2)return {ok:false,odd:true};
-    const P=n/2,key='team#'+d.players.join('\u0001')+'#'+c;
-    if(preview.key!==key)preview={key,rounds:buildTeamRR(pairsOf(d.players),n,c)};
-    return {ok:true,plan:'team',total:preview.rounds.length,games:P-1,pairsN:P,perRound:Math.floor(P/2),packed:c<Math.floor(P/2)};
+    const P=n/2,cy=d.cycles||1,key='team#'+d.players.join('\u0001')+'#'+c+'#'+cy;
+    if(preview.key!==key)preview={key,rounds:buildTeamRR(pairsOf(d.players),n,c,cy)};
+    return {ok:true,plan:'team',total:preview.rounds.length,games:(P-1)*cy,cycles:cy,pairsN:P,perRound:Math.floor(P/2),packed:c<Math.floor(P/2)};
+  }
+  if(d.format==='teammex'){
+    const P=n/2,actP=2*Math.min(c,Math.floor(P/2)),sP=P-actP,stepP=sP?P/gcd(P,sP):1;
+    const defP=stepP===1?5:Math.ceil(5/stepP)*stepP,R=(d.rounds&&d.rounds%stepP===0)?d.rounds:defP;
+    return {ok:true,plan:'mex',total:R,games:R*actP/P,act:actP*2,step:stepP,def:defP,pairsN:P,restPairs:sP};
   }
   const act=activeCount(n,c),step=restStep(n,c);
   const pick=def=>(d.rounds&&d.rounds%step===0)?d.rounds:def;
@@ -509,7 +542,7 @@ function renderHome(app){
   const active=all.filter(t=>t.status==='active').sort((a,b)=>b.updatedAt-a.updatedAt);
   const done=all.filter(t=>t.status==='finished').sort((a,b)=>(b.finishedAt||0)-(a.finishedAt||0));
   const item=(t,act)=>{
-    const champ=t.status==='finished'?standings(t).st.filter(s=>s.p1===1).map(s=>s.name).join(t.format==='team'?', ':' и '):'';
+    const champ=t.status==='finished'?standings(t).st.filter(s=>s.p1===1).map(s=>s.name).join(PAIRF(t.format)?', ':' и '):'';
     const meta=act?`${t.stage==='results'?'Все игры сыграны — завершите турнир':`Раунд ${t.round+1} из ${t.cfg.total}`} · ${t.players.length} игроков`
       :`${dateRu(t.finishedAt||t.createdAt)} · ${t.players.length} игроков · 🏆 ${esc(champ)}`;
     return `<button class="titem" data-a="open" data-id="${t.id}"><span class="ticon ${(FMT_ICON[t.format]||FMT_ICON.americano)[0]}">${(FMT_ICON[t.format]||FMT_ICON.americano)[1]}</span>
@@ -534,23 +567,28 @@ function renderSetup(app){
     <button data-a="fmt" data-v="americano" class="${d.format==='americano'?'on':''}">Американо</button>
     <button data-a="fmt" data-v="mexicano" class="${d.format==='mexicano'?'on':''}">Мексикано</button>
     <button data-a="fmt" data-v="team" class="${d.format==='team'?'on':''}">Парный американо</button>
-    <button class="soon" disabled>Фаст американо<br><small>скоро</small></button></div>`;
+    <button data-a="fmt" data-v="teammex" class="${d.format==='teammex'?'on':''}">Парный мексикано</button></div>`;
   const fmtNote={
     americano:'Партнёры меняются каждый раунд: каждый сыграет в паре с каждым. Зачёт личный, места — по Δ.',
     mexicano:'1-й раунд — пары по жребию. Дальше пары составляются по текущей таблице: сильные играют с сильными. Зачёт личный, места — по Δ.',
-    team:'Пары постоянные на весь турнир. Каждая пара сыграет с каждой другой парой по одному разу (раунд робин). Зачёт по парам, места — по Δ пары.'
+    team:'Пары постоянные на весь турнир. Каждая пара сыграет с каждой другой парой по одному разу (раунд робин). Зачёт по парам, места — по Δ пары.',
+    teammex:'Пары постоянные на весь турнир. 1-й раунд — соперники по жребию, дальше пары с близким результатом играют друг с другом. Зачёт по парам, места — по Δ пары.'
   }[d.format];
   const fmtCompare=`<details class="fmtcmp"><summary>Чем отличаются форматы ›</summary>
     <div class="fr"><b>Американо</b><div>Пришли поодиночке. Партнёр новый каждый раунд, у каждого свой личный зачёт. Подходит для смешанного уровня и вечеров для общения.</div></div>
     <div class="fr"><b>Мексикано</b><div>Пришли поодиночке, но уровень сильно разный. Пары собираются по таблице, поэтому игры ровнее и азартнее. Личный зачёт.</div></div>
     <div class="fr"><b>Парный американо</b><div>Пришли своими парами. Пара не меняется весь турнир, играет против всех остальных пар. Побеждает пара, а не один игрок.</div></div>
+    <div class="fr"><b>Парный мексикано</b><div>Пришли своими парами, уровень пар разный. Пара не меняется, а соперник каждый раунд — пара с близким результатом. Игры ровнее, побеждает пара.</div></div>
   </details>`;
   let roundsBlock='';
   if(!P.ok)roundsBlock=P.odd?`<div class="warn"><b>Нужно чётное число игроков</b> — в парном американо каждый игрок в паре. Сейчас ${n}: добавьте или уберите одного.</div>`
     :`<div class="info">Добавьте минимум 4 игроков — тогда появится расчёт раундов</div>`;
   else if(P.plan==='team'){
-    roundsBlock=`<div class="row"><div><div style="font-weight:800">Раунды</div><div class="hint" style="margin:0">Фиксировано форматом</div></div><span class="fixed">${P.total}</span></div>
-      <div class="info">${IC.check} ${P.pairsN} ${plural(P.pairsN,'пара','пары','пар')}: каждая сыграет с каждой <b>ровно 1 раз</b>, у всех по <b>${P.games}</b> ${plural(P.games,'игре','игры','игр')}.
+    roundsBlock=`<div class="row"><div><div style="font-weight:800">Кругов</div><div class="hint" style="margin:0">Круг — каждая пара сыграла с каждой</div></div>
+        <div class="stepper"><button data-a="cystep" data-d="-1" aria-label="Меньше кругов">−</button><span class="val">${P.cycles}</span><button data-a="cystep" data-d="1" aria-label="Больше кругов">+</button></div></div>
+      <div class="row"><div><div style="font-weight:800">Раунды</div><div class="hint" style="margin:0">Считается автоматически</div></div><span class="fixed">${P.total}</span></div>
+      <div class="info">${IC.check} ${P.pairsN} ${plural(P.pairsN,'пара','пары','пар')}: каждая сыграет с каждой <b>${P.cycles===1?'ровно 1 раз':`по ${P.cycles} раза`}</b>, у всех по <b>${P.games}</b> ${plural(P.games,'игре','игры','игр')}.
+      ${P.pairsN===2&&P.cycles===1?'<br>Всего 2 пары — за один круг будет 1 матч. Добавьте круги, чтобы сыграть больше.':''}
       ${P.pairsN%2?'<br>Пар нечётное число — в каждом раунде одна пара отдыхает, каждая по одному разу.':''}
       ${P.packed?`<br>Кортов меньше максимума (${P.perRound}) — часть пар ждёт, но у всех всё равно по ${P.games} ${plural(P.games,'игре','игры','игр')}.`:''}</div>`;
   }
@@ -565,7 +603,8 @@ function renderSetup(app){
       Чтобы все сыграли со всеми, нужно ${nf.lo} или ${nf.hi} игроков. Либо играйте этот вариант: <b>у всех одинаковое число игр</b>, партнёры как можно разнообразнее, но не все со всеми.</div>`:''}
       <div class="row" style="margin-top:14px"><div><div style="font-weight:800">Раунды</div><div class="hint" style="margin:0">${P.step>1?`Шаг ${P.step} — чтобы у всех было поровну игр`:'Обычно 5–8 раундов'}</div></div>
         <div class="stepper"><button data-a="rstep" data-d="-1" aria-label="Меньше раундов">−</button><span class="val">${P.total}</span><button data-a="rstep" data-d="1" aria-label="Больше раундов">+</button></div></div>
-      <div class="info">У каждого будет ровно <b>${P.games}</b> ${plural(P.games,'игра','игры','игр')}${n-P.act?` · в раунде отдыхают ${n-P.act}, по очереди`:''}.</div>`;
+      <div class="info">${d.format==='teammex'?`У каждой пары будет ровно <b>${P.games}</b> ${plural(P.games,'игра','игры','игр')}${P.restPairs?` · в раунде отдыхает ${P.restPairs} ${plural(P.restPairs,'пара','пары','пар')}, по очереди`:''}`
+        :`У каждого будет ровно <b>${P.games}</b> ${plural(P.games,'игра','игры','игр')}${n-P.act?` · в раунде отдыхают ${n-P.act}, по очереди`:''}`}.</div>`;
   }
   app.innerHTML=`
   <div class="topbar"><button class="iconbtn" data-a="home" aria-label="На главную">${IC.home}</button><div style="flex:1"></div></div>
@@ -581,16 +620,16 @@ function renderSetup(app){
       ${fmtCompare}
     </section>
     <section class="card">
-      <div class="row" style="margin-bottom:10px"><div class="label" style="margin:0">${d.format==='team'?`Пары · ${Math.floor(n/2)}${n%2?' + 1 игрок':''}`:`Участники · ${n}`}</div>
+      <div class="row" style="margin-bottom:10px"><div class="label" style="margin:0">${PAIRF(d.format)?`Пары · ${Math.floor(n/2)}${n%2?' + 1 игрок':''}`:`Участники · ${n}`}</div>
         ${n?`<button class="textbtn" data-a="clear" style="padding:0">${d.sample?'Убрать пример':'Очистить'}</button>`:''}</div>
       ${d.sample?'<div class="hint" style="margin:0 0 10px">Это пример — замените своими игроками</div>':''}
-      ${d.format==='team'?`<div class="stack" style="gap:8px">${(()=>{const out=[];for(let i=0;i<n;i+=2){const a=d.players[i],b=d.players[i+1];
+      ${PAIRF(d.format)?`<div class="stack" style="gap:8px">${(()=>{const out=[];for(let i=0;i<n;i+=2){const a=d.players[i],b=d.players[i+1];
           out.push(`<div class="pairchip ${b==null?'half':''}"><span class="num">${i/2+1}</span><span class="pn">${esc(a)} + ${b==null?'<span style="color:var(--mute)">ждёт партнёра</span>':esc(b)}</span><button class="x" data-a="rmpair" data-i="${i}" aria-label="Удалить пару">✕</button></div>`)}
           return out.join('')||'<span class="hint" style="margin:0">Добавьте минимум 2 пары</span>'})()}</div>
         ${n>=4?'<button class="textbtn" data-a="shufflepairs">Перемешать пары случайно</button>':''}`
       :`<div class="chips">${d.players.map((p,i)=>`<span class="chip">${esc(p)}<button class="x" data-a="rm" data-i="${i}" aria-label="Удалить ${esc(p)}">✕</button></span>`).join('')||'<span class="hint" style="margin:0">Добавьте минимум 4 игроков</span>'}</div>`}
-      <form class="addbox" id="addform"><input class="textin" id="newname" placeholder="${d.format==='team'?'Анна + Борис':'Имя игрока'}" autocomplete="off" enterkeyhint="done" aria-label="Имя игрока"><button type="submit" aria-label="Добавить">+</button></form>
-      <div class="hint">${d.format==='team'?'Вводите пару через «+»: Анна + Борис. Или по одному имени — пары собираются по порядку.':'Можно вставить сразу список — через запятую или с новой строки'}</div>
+      <form class="addbox" id="addform"><input class="textin" id="newname" placeholder="${PAIRF(d.format)?'Анна + Борис':'Имя игрока'}" autocomplete="off" enterkeyhint="done" aria-label="Имя игрока"><button type="submit" aria-label="Добавить">+</button></form>
+      <div class="hint">${PAIRF(d.format)?'Вводите пару через «+»: Анна + Борис. Или по одному имени — пары собираются по порядку.':'Можно вставить сразу список — через запятую или с новой строки'}</div>
       <div class="err" id="e-names"></div>
     </section>
     <section class="card">
@@ -610,8 +649,8 @@ function renderSetup(app){
       </div>`:''}
     </section>
     <section class="card">
-      <div class="row"><div><div style="font-weight:800">Корты</div>${n>=4?`<div class="hint" style="margin:0">${d.courts>=maxCourts(d)?`Максимум для ${n} ${plural(n,'игрока','игроков','игроков')}`:`Максимум ${maxCourts(d)} — сейчас часть ${d.format==='team'?'пар':'игроков'} будет ждать`}</div>`:''}</div>
-        <div class="stepper"><button data-a="cstep" data-d="-1" aria-label="Меньше кортов">−</button><span class="val">${d.courts}</span><button data-a="cstep" data-d="1" aria-label="Больше кортов">+</button></div></div>
+      <div class="row"><div><div style="font-weight:800">Корты</div>${n>=4?`<div class="hint" style="margin:0">${effCourts(d)>=maxCourts(d)?`Максимум для ${n} ${plural(n,'игрока','игроков','игроков')}`:`Максимум ${maxCourts(d)} — сейчас часть ${PAIRF(d.format)?'пар':'игроков'} будет ждать`}</div>`:''}</div>
+        <div class="stepper"><button data-a="cstep" data-d="-1" aria-label="Меньше кортов">−</button><span class="val">${effCourts(d)}</span><button data-a="cstep" data-d="1" aria-label="Больше кортов">+</button></div></div>
       <div class="row" style="display:block">${roundsBlock}</div>
       <div class="err" id="e-cfg"></div>
     </section>
@@ -627,7 +666,7 @@ function defaultName(d){return `${FMT[d.format]} · ${dateRu(Date.now())}`}
 
 function addNames(text){
   const d=store.draft;if(d.sample){d.players=[];d.sample=false}
-  const list=text.split(d.format==='team'?/[\n,;+\/]+/:/[\n,;]+/).map(s=>s.trim()).filter(Boolean);
+  const list=text.split(PAIRF(d.format)?/[\n,;+\/]+/:/[\n,;]+/).map(s=>s.trim()).filter(Boolean);
   if(!list.length){$('#e-names').textContent='Введите имя';return}
   const skipped=[];
   list.forEach(n=>{if(d.players.some(p=>p.toLowerCase()===n.toLowerCase()))skipped.push(n);else d.players.push(n.slice(0,40))});
@@ -639,18 +678,18 @@ function startTournament(){
   const d=store.draft,n=d.players.length;
   if(n<4){$('#e-names').textContent='Нужно минимум 4 игрока';$('#e-names').scrollIntoView({block:'center',behavior:'smooth'});return}
   if(n>40){$('#e-names').textContent='Максимум 40 игроков';return}
-  if(d.format==='team'&&n%2){$('#e-names').textContent='Нужно чётное число игроков — у одного нет пары';$('#e-names').scrollIntoView({block:'center',behavior:'smooth'});return}
+  if(PAIRF(d.format)&&n%2){$('#e-names').textContent='Нужно чётное число игроков — у одного нет пары';$('#e-names').scrollIntoView({block:'center',behavior:'smooth'});return}
   const P=planFor(d),id=newId();
-  const T={id,name:(d.name.trim()||defaultName(d)).slice(0,60),format:d.format,players:d.players.slice(),
-    cfg:{limit:d.limit,mode:d.mode,courts:d.courts,scheme:d.scheme||'13',plan:P.plan,total:P.total},
+  const T={id,name:(d.name.trim()||defaultName(d)).slice(0,60),format:d.format,players:d.players.slice(),pairs:PAIRF(d.format)?pairsOf(d.players):undefined,
+    cfg:{limit:d.limit,mode:d.mode,courts:effCourts(d),scheme:d.scheme||'13',plan:P.plan,total:P.total},
     rounds:[],round:0,stage:'play',status:'active',createdAt:Date.now(),updatedAt:Date.now()};
   if(P.plan==='full'||P.plan==='team')T.rounds=clone(preview.rounds);
-  if(P.plan==='team')T.pairs=pairsOf(T.players);
-  else if(P.plan==='equal')T.rounds=buildEqualGames(n,d.courts,P.total);
+
+  else if(P.plan==='equal')T.rounds=buildEqualGames(n,effCourts(d),P.total);
   else T.rounds=[mexicanoRound(T)];
   T.cfg.total=P.plan==='mex'?P.total:T.rounds.length;
   store.tournaments[id]=T;preview={key:'',rounds:null};
-  store.draft={...freshDraft(),players:d.players.slice(),sample:false,format:d.format,limit:d.limit,mode:d.mode,courts:d.courts,scheme:d.scheme};
+  store.draft={...freshDraft(),players:d.players.slice(),sample:false,format:d.format,limit:d.limit,mode:d.mode,courts:d.courts,scheme:d.scheme,cycles:d.cycles||1};
   touch(T);go('play',id,'play');wake();
 }
 
@@ -664,7 +703,7 @@ function renderTabbar(T){
 }
 function header(T,title){
   const total=T.cfg.total,doneM=T.rounds.reduce((a,r)=>a+r.matches.filter(m=>m.done).length,0);
-  const allM=T.format==='mexicano'?total*T.rounds[0].matches.length:T.rounds.reduce((a,r)=>a+r.matches.length,0);
+  const allM=MEXF(T.format)?total*T.rounds[0].matches.length:T.rounds.reduce((a,r)=>a+r.matches.length,0);
   const pct=Math.min(100,Math.round(doneM/allM*100));
   return `<div class="topbar"><button class="iconbtn" data-a="home" aria-label="На главную">${IC.home}</button>
     <div style="flex:1;min-width:0;text-align:center;padding-top:4px"><div class="eyebrow" style="overflow-wrap:anywhere">${esc(T.name)}</div>
@@ -694,8 +733,8 @@ function renderPlay(app,T){
   app.innerHTML=`
   ${header(T,`<h1 class="big" style="margin-top:14px">Раунд ${T.round+1}<span style="opacity:.5;font-size:24px"> / ${total}</span></h1>`)}
   <div class="stack" style="margin-top:14px">
-    ${T.format==='mexicano'&&T.round===0?'<div class="rest">Первый раунд — пары по жребию</div>':''}
-    ${T.format==='mexicano'&&T.round>0?'<div class="rest">Пары составлены по таблице после прошлого раунда</div>':''}
+    ${MEXF(T.format)&&T.round===0?`<div class="rest">Первый раунд — ${T.format==='teammex'?'соперники':'пары'} по жребию</div>`:''}
+    ${MEXF(T.format)&&T.round>0?`<div class="rest">${T.format==='teammex'?'Соперники подобраны':'Пары составлены'} по таблице после прошлого раунда</div>`:''}
     ${R.sit.length?`<div class="rest">Отдыхают: ${R.sit.map(i=>`<span class="p">${esc(T.players[i])}</span>`).join('')}</div>`:''}
     ${R.matches.map((m,k)=>`<article class="card court ${m.done?'isdone':''}" id="court-${k}">
       <div class="court-head"><span class="court-tag">КОРТ ${k+1}</span>${m.done?`<span class="done-tag">${IC.check} Сыграно</span>`:''}</div>
@@ -706,7 +745,7 @@ function renderPlay(app,T){
       </div></article>`).join('')}
     ${next?`<section class="card"><div class="label">Дальше · раунд ${T.round+2}</div>
       ${next.matches.map((m,k)=>`<div class="mline"><span>${m.t1.map(i=>esc(T.players[i])).join(' / ')}</span><span class="sc pending">К${k+1}</span><span class="r">${m.t2.map(i=>esc(T.players[i])).join(' / ')}</span></div>`).join('')}</section>`
-      :T.format==='mexicano'&&T.rounds.length<total?`<div class="rest">Пары следующего раунда появятся, когда закончатся все игры этого</div>`:''}
+      :MEXF(T.format)&&T.rounds.length<total?`<div class="rest">Пары следующего раунда появятся, когда закончатся все игры этого</div>`:''}
   </div>`;
   app.querySelectorAll('.score input').forEach(el=>el.addEventListener('input',()=>setScore(T,+el.dataset.m,el.dataset.s,el.value,false)));
 }
@@ -725,7 +764,7 @@ function setScore(T,k,s,v,fromBtn){
 function leaderboard(T,st,ties,unequal){
   const any=st.some(s=>s.g);
   return `<section class="card">
-    <div class="row" style="margin-bottom:4px"><div class="label" style="margin:0">${T.format==='team'?'Пара':'Игрок'}</div><div class="label" style="margin:0">Δ</div></div>
+    <div class="row" style="margin-bottom:4px"><div class="label" style="margin:0">${PAIRF(T.format)?'Пара':'Игрок'}</div><div class="label" style="margin:0">Δ</div></div>
     ${st.map(s=>`<div class="lb-row">
       <span class="place ${any&&s.p1<=3?'p'+s.p1:''} ${s.tie?'tie':''}">${any?s.place:'—'}</span>
       <div style="min-width:0"><div class="lb-name">${esc(s.name)}</div>
@@ -747,7 +786,7 @@ function renderGrid(app,T){
       return m.done?`<button class="mline" data-a="gridedit" data-r="${i}" data-m="${k}">${inner}</button>`:`<div class="mline">${inner}</div>`}).join('')}
     ${r.sit.length?`<div class="hint">Отдыхают: ${r.sit.map(p=>esc(T.players[p])).join(', ')}</div>`:''}
   </section>`).join('')}
-  ${T.format==='mexicano'&&T.rounds.length<T.cfg.total?`<div class="rest">Ещё ${T.cfg.total-T.rounds.length} ${plural(T.cfg.total-T.rounds.length,'раунд','раунда','раундов')} — пары составятся по ходу турнира</div>`:''}
+  ${MEXF(T.format)&&T.rounds.length<T.cfg.total?`<div class="rest">Ещё ${T.cfg.total-T.rounds.length} ${plural(T.cfg.total-T.rounds.length,'раунд','раунда','раундов')} — пары составятся по ходу турнира</div>`:''}
   </div>`;
 }
 
@@ -760,8 +799,8 @@ function renderResults(app,T){
   const {st,ties,unequal}=standings(T);const champs=st.filter(s=>s.p1===1);
   app.innerHTML=`${header(T,'')}
   <div class="eyebrow" style="margin-top:14px">${unequal?'Турнир остановлен досрочно':'Все игры сыграны'}</div>
-  <div class="sub" style="margin-top:8px">${T.format==='team'||champs.length>1?'Чемпионы':'Чемпион'}</div>
-  <div class="champ">${champs.map(s=>esc(s.name)).join(T.format==='team'?', ':' и ')}</div>
+  <div class="sub" style="margin-top:8px">${PAIRF(T.format)||champs.length>1?'Чемпионы':'Чемпион'}</div>
+  <div class="champ">${champs.map(s=>esc(s.name)).join(PAIRF(T.format)?', ':' и ')}</div>
   <div class="sub">Δ ${fmtD(st[0].d)} · ${st[0].f}:${st[0].a}</div>
   <section class="card pop" style="margin-top:18px;padding-bottom:0;overflow:hidden">${podiumHTML(st)}</section>
   <div class="stack" style="margin-top:14px">
@@ -777,7 +816,7 @@ function renderArchived(app,T){
     <div style="flex:1"></div><button class="iconbtn" data-a="amenu" aria-label="Действия">${IC.dots}</button></div>
   <div class="eyebrow" style="margin-top:14px">${FMT[T.format]} · ${dateRu(T.finishedAt||T.createdAt)} · завершён</div>
   <h1 class="big">${esc(T.name)}</h1>
-  <div class="sub">${T.format==='team'||champs.length>1?'Чемпионы':'Чемпион'}: <b style="color:var(--ball)">${champs.map(s=>esc(s.name)).join(T.format==='team'?', ':' и ')}</b></div>
+  <div class="sub">${PAIRF(T.format)||champs.length>1?'Чемпионы':'Чемпион'}: <b style="color:var(--ball)">${champs.map(s=>esc(s.name)).join(PAIRF(T.format)?', ':' и ')}</b></div>
   <section class="card" style="margin-top:18px;padding-bottom:0;overflow:hidden">${podiumHTML(st)}</section>
   <div class="stack" style="margin-top:14px">
     ${leaderboard(T,st,ties,unequal)}
@@ -809,7 +848,7 @@ function finishMatch(T,k){
   if(er){$('#err-'+k).textContent=er;return}
   clearTimeout(scoreSaveTimer);
   m.s1=+m.s1;m.s2=+m.s2;m.done=true;buzz();
-  if(T.format==='mexicano'){
+  if(MEXF(T.format)){
     if(R.matches.every(x=>x.done)){
       if(T.rounds.length<T.cfg.total){T.rounds.push(mexicanoRound(T));T.round=T.rounds.length-1;touch(T);render();scrollTo({top:0,behavior:'smooth'});toast(`Раунд ${T.round+1} — пары по таблице`);return}
       T.stage='results';touch(T);render();scrollTo(0,0);return;
@@ -857,7 +896,8 @@ document.addEventListener('click',e=>{
     case 'lstep':d.limit=Math.min(99,Math.max(1,d.limit+ +b.dataset.d));buzz();saveLocal();return render();
     case 'mode':d.mode=b.dataset.v;saveLocal();return render();
     case 'scheme':d.scheme=b.dataset.v;saveLocal();return render();
-    case 'cstep':d.courts=Math.min(maxCourts(d),Math.max(1,d.courts+ +b.dataset.d));d.rounds=null;buzz();saveLocal();return render();
+    case 'cstep':d.courts=Math.min(maxCourts(d),Math.max(1,effCourts(d)+ +b.dataset.d));d.rounds=null;buzz();saveLocal();return render();
+    case 'cystep':d.cycles=Math.min(4,Math.max(1,(d.cycles||1)+ +b.dataset.d));buzz();saveLocal();return render();
     case 'rstep':{const P=planFor(d);if(!P.ok)return;d.rounds=Math.min(Math.max(P.step,Math.floor(60/P.step)*P.step),Math.max(P.step,P.total+ +b.dataset.d*P.step));buzz();saveLocal();return render()}
     case 'start':return startTournament();
     case 'tab':store.ui.tab=b.dataset.v;saveLocal();render();return scrollTo(0,0);
@@ -866,17 +906,17 @@ document.addEventListener('click',e=>{
       buzz();return setScore(T,k,s,String(v),true);}
     case 'finish':return finishMatch(T,+b.dataset.m);
     case 'edit':{const m=T.rounds[T.round].matches[+b.dataset.m];
-      if(T.format==='mexicano'&&T.round<T.rounds.length-1)return toast('Следующий раунд уже составлен по этому счёту');
+      if(MEXF(T.format)&&T.round<T.rounds.length-1)return toast('Следующий раунд уже составлен по этому счёту');
       m.done=false;m.s1=String(m.s1);m.s2=String(m.s2);touch(T);return render();}
     case 'gridedit':{const ri=+b.dataset.r,k=+b.dataset.m,m=T.rounds[ri].matches[k];
-      if(T.format==='mexicano'&&ri<T.rounds.length-1)return sheet('Нельзя исправить','В Мексикано пары следующих раундов уже составлены по этому счёту. Исправить можно только матчи последнего раунда.',[]);
+      if(MEXF(T.format)&&ri<T.rounds.length-1)return sheet('Нельзя исправить','В мексикано пары следующих раундов уже составлены по этому счёту. Исправить можно только матчи последнего раунда.',[]);
       return sheet('Исправить счёт?',`Матч ${m.s1}:${m.s2} снова станет открытым — введите верный счёт и нажмите «Закончить игру».`,[{label:'Исправить',kind:'primary',run:()=>reopenMatch(T,ri,k)}]);}
     case 'finishT':
       T.status='finished';T.finishedAt=Date.now();T.stage='results';touch(T);go('home',null);confetti();return toast('Турнир сохранён в завершённых');
     case 'menu':{
       const acts=[{label:'Переименовать',run:()=>renameSheet(T)}];
       if(T.stage==='play'&&T.round>0){
-        if(T.format==='mexicano'){
+        if(MEXF(T.format)){
           if(!T.rounds[T.round].matches.some(m=>m.done))acts.push({label:'Вернуться к прошлому раунду',run:()=>sheet('Вернуться к раунду '+T.round+'?','Пары текущего раунда будут составлены заново после исправления.',[{label:'Вернуться',kind:'primary',run:()=>{T.rounds.pop();T.round=T.rounds.length-1;touch(T);store.ui.tab='play';render()}}])});
         }else acts.push({label:'Предыдущий раунд',run:()=>{T.round--;touch(T);store.ui.tab='play';render()}});
       }
