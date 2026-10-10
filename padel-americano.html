@@ -533,7 +533,7 @@ function renderSetup(app){
     </section>
     <section class="card">
       <div class="label">Игра до</div>
-      <div class="chips" style="margin-bottom:12px">${[12,16,21,24,32].map(v=>`<button class="chip ${d.limit===v?'on':''}" data-a="limit" data-v="${v}">${v}</button>`).join('')}</div>
+      <div class="chips" style="margin-bottom:12px">${[9,12,16,21,24,32].map(v=>`<button class="chip ${d.limit===v?'on':''}" data-a="limit" data-v="${v}">${v}</button>`).join('')}</div>
       <div class="row"><span>Своё значение</span>
         <div class="stepper"><button data-a="lstep" data-d="-1" aria-label="Меньше">−</button><span class="val">${d.limit}</span><button data-a="lstep" data-d="1" aria-label="Больше">+</button></div></div>
       <div class="label" style="margin-top:16px">Правило счёта</div>
