@@ -1,4 +1,4 @@
-<title>Падел Американо</title>
+<title>Padla Tour</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1638E8">
@@ -10,7 +10,7 @@
 :root{
   --court:#1638E8; --court-deep:#0C24B0; --ball:#DFFF2F; --ink:#0A1240; --paper:#FFFFFF;
   --mist:#EEF1FF; --mute:#6A72A6; --coral:#FF5B4D; --mint:#14B86E; --gold:#FFC93C; --silver:#C9D0E6; --bronze:#F0A36B;
-  --warnbg:#FFF4D6; --warnfg:#7A4B00;
+  --warnbg:#FFF4D6; --warnfg:#7A4B00; --tt:#FF8A2B;
   --lineW:rgba(255,255,255,.16);
   --f-display:"Unbounded","Arial Black",system-ui,sans-serif;
   --f-body:"Manrope",-apple-system,"SF Pro Text",system-ui,sans-serif;
@@ -160,6 +160,45 @@ button.mline .sc{background:#E3E8FF}
 .sheet .act.danger{background:var(--coral);color:#fff}
 .sheet .act.primary{background:var(--ink);color:var(--ball)}
 .toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--ball);font-weight:800;padding:12px 18px;border-radius:var(--r-pill);box-shadow:0 10px 26px rgba(0,0,0,.3);animation:fade .2s ease;max-width:calc(100% - 32px);text-align:center}
+.sportcard{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--paper);color:var(--ink);border-radius:var(--r-card);padding:16px 18px;text-align:left;box-shadow:0 14px 34px rgba(5,14,90,.28);width:100%}
+.sportcard b{display:block;font-family:var(--f-display);font-size:19px;font-weight:800}
+.sportcard span span,.sportcard>span>span{display:block;color:var(--mute);font-size:14px;font-weight:600}
+.sic{width:64px;height:64px;border-radius:20px;display:grid;place-items:center}
+.sic.pad{background:var(--court);color:var(--ball)} .sic.tt{background:var(--ink);color:var(--tt)}
+.ticon.tt{background:var(--ink);color:var(--tt)}
+.eyebrow.tt{color:var(--tt)} .champ.tt{color:var(--tt)}
+.cta.tt{background:var(--tt);color:var(--ink);box-shadow:0 10px 26px rgba(255,138,43,.35)}
+.court-tag.tt{color:var(--tt)}
+.fmtopt{display:block;width:100%;text-align:left;background:var(--mist);color:var(--ink);border-radius:16px;padding:12px 14px;border:2px solid transparent}
+.fmtopt b{display:block;font-weight:800;font-size:16px} .fmtopt small{color:var(--mute);font-weight:600;font-size:13px}
+.fmtopt em{font-style:normal;font-size:11px;background:var(--tt);color:var(--ink);padding:2px 7px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.fmtopt.on{border-color:var(--ink);background:var(--paper)} .fmtopt.dim{opacity:.45}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;background:var(--mist);color:var(--ink);border-radius:16px;padding:12px 14px}
+.toggle b{display:block;font-weight:800;font-size:15px} .toggle small{display:block;color:var(--mute);font-weight:600;font-size:13px}
+.toggle i{flex:none;width:46px;height:28px;border-radius:999px;background:var(--silver);position:relative;transition:background .2s}
+.toggle i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle.on i{background:var(--mint)} .toggle.on i::after{transform:translateX(18px)}
+.seedno{font-family:var(--f-display);font-size:11px;color:var(--mute)}
+.btnrow{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center}
+.finish.alt{background:var(--mist);color:var(--ink)}
+.iconbtn.sm{width:44px;height:44px;background:var(--mist);color:var(--ink)}
+.gamegrid{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px;align-items:center;margin-bottom:10px}
+.gamegrid b{font-size:14px;font-weight:800;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gno{font-family:var(--f-display);font-size:13px;color:var(--mute);text-align:center}
+.gin{width:100%;height:50px;border-radius:14px;border:2px solid var(--mist);text-align:center;font-family:var(--f-display);font-weight:800;font-size:22px;color:var(--ink);background:var(--paper);-moz-appearance:textfield}
+.gin::-webkit-outer-spin-button,.gin::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.gin:focus{border-color:var(--court);outline:none} .gin.bad{border-color:var(--coral);background:#FFF1EF}
+.matchsum{font-size:15px;color:var(--ink);font-weight:600;margin:4px 0}
+.livewrap{display:grid;gap:12px;margin-top:14px}
+.livehalf{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:34vh;border-radius:28px;background:var(--paper);color:var(--ink);padding:16px;box-shadow:0 14px 34px rgba(5,14,90,.28)}
+.livehalf:active{transform:scale(.985)}
+.livehalf.serving{outline:4px solid var(--tt)}
+.lname{font-weight:800;font-size:18px;text-align:center;overflow-wrap:anywhere}
+.lpts{font-family:var(--f-display);font-weight:800;font-size:96px;line-height:1;font-variant-numeric:tabular-nums}
+.lgames{color:var(--mute);font-weight:700;font-size:14px} .lgames b{color:var(--ink)}
+.lserve{display:inline-flex;align-items:center;gap:6px;background:var(--tt);color:var(--ink);font-size:13px;font-weight:800;padding:5px 12px 5px 6px;border-radius:999px}
+.ballico.tt{background:#FFB36B}
+.mline .wn{font-weight:800} .qual{background:#DDF7EA;color:#0B7A47;font-size:11px;padding:2px 7px;border-radius:999px}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:40;width:100%;height:100%}
 .pop{animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
 @keyframes fade{from{opacity:0}}
@@ -206,7 +245,7 @@ const IC={
 
 /* ================= storage: phone first, cloud copy when available ================= */
 function freshDraft(){return {name:'',format:'americano',players:SAMPLE.slice(),sample:true,limit:24,mode:'sum',courts:2,rounds:null,scheme:'13',cycles:1}}
-function freshStore(){return {tournaments:{},draft:freshDraft(),ui:{screen:'home',id:null,tab:'play'},unsynced:[]}}
+function freshStore(){return {tournaments:{},draft:freshDraft(),ttdraft:freshTTDraft(),ui:{screen:'home',id:null,tab:'play'},unsynced:[]}}
 let store;
 function loadLocal(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
@@ -531,9 +570,11 @@ function render(){
   const s=store.ui.screen,T=cur();
   if((s==='play'||s==='view')&&(!T||T.deleted)){store.ui={screen:'home',id:null,tab:'play'};}
   const app=$('#app');
+  if(store.ui.screen==='sport'){$('#tabbar').innerHTML='';return renderSportPick(app)}
   if(store.ui.screen==='setup'){$('#tabbar').innerHTML='';return renderSetup(app)}
-  if(store.ui.screen==='play'){renderTabbar(T);return renderTournament(app,T)}
-  if(store.ui.screen==='view'){$('#tabbar').innerHTML='';return renderArchived(app,T)}
+  if(store.ui.screen==='ttsetup'){$('#tabbar').innerHTML='';return renderTTSetup(app)}
+  if(store.ui.screen==='play'){if(T.sport==='tt')return renderTT(app,T);renderTabbar(T);return renderTournament(app,T)}
+  if(store.ui.screen==='view'){$('#tabbar').innerHTML='';return T.sport==='tt'?renderTTArchived(app,T):renderArchived(app,T)}
   $('#tabbar').innerHTML='';renderHome(app);
 }
 
@@ -542,18 +583,22 @@ function renderHome(app){
   const active=all.filter(t=>t.status==='active').sort((a,b)=>b.updatedAt-a.updatedAt);
   const done=all.filter(t=>t.status==='finished').sort((a,b)=>(b.finishedAt||0)-(a.finishedAt||0));
   const item=(t,act)=>{
+    if(t.sport==='tt'){const p=ttProgress(t),ch=t.status==='finished'?ttFinal(t).filter(r=>r.p1===1).map(r=>r.name).join(', '):'';
+      const meta=act?(t.stage==='results'?'Все матчи сыграны — завершите турнир':`Сыграно ${p.done} из ${p.all}`):`${dateRu(t.finishedAt||t.createdAt)} · 🏆 ${esc(ch)}`;
+      return `<button class="titem" data-a="open" data-id="${t.id}"><span class="ticon tt">ТТ</span>
+      <span style="min-width:0"><span class="tname" style="display:block">${esc(t.name)}</span><span class="tmeta">Настольный теннис · ${TT_SCHEME[t.scheme]} · ${meta}</span></span><span class="chev">›</span></button>`}
     const champ=t.status==='finished'?standings(t).st.filter(s=>s.p1===1).map(s=>s.name).join(PAIRF(t.format)?', ':' и '):'';
     const meta=act?`${t.stage==='results'?'Все игры сыграны — завершите турнир':`Раунд ${t.round+1} из ${t.cfg.total}`} · ${t.players.length} игроков`
       :`${dateRu(t.finishedAt||t.createdAt)} · ${t.players.length} игроков · 🏆 ${esc(champ)}`;
     return `<button class="titem" data-a="open" data-id="${t.id}"><span class="ticon ${(FMT_ICON[t.format]||FMT_ICON.americano)[0]}">${(FMT_ICON[t.format]||FMT_ICON.americano)[1]}</span>
-      <span style="min-width:0"><span class="tname" style="display:block">${esc(t.name)}</span><span class="tmeta">${FMT[t.format]} · ${meta}</span></span><span class="chev">›</span></button>`;
+      <span style="min-width:0"><span class="tname" style="display:block">${esc(t.name)}</span><span class="tmeta">Падел · ${FMT[t.format]} · ${meta}</span></span><span class="chev">›</span></button>`;
   };
   app.innerHTML=`
-  <div class="eyebrow">Падел · турниры</div>
+  <div class="eyebrow">Padla Tour</div>
   <h1 class="big">Мои турниры</h1>
   <div style="margin:4px 0 18px">${syncChip()}</div>
   <div class="stack">
-    <button class="cta" data-a="new">Новый турнир ${IC.arrow}</button>
+    <button class="cta" data-a="new">Создать турнир ${IC.arrow}</button>
     ${active.length?`<section class="card"><div class="label">Идут сейчас</div><div class="tlist">${active.map(t=>item(t,true)).join('')}</div></section>`:''}
     <section class="card"><div class="label">Завершённые</div>
       ${done.length?`<div class="tlist">${done.map(t=>item(t,false)).join('')}</div>`:'<div class="empty">Здесь появятся турниры после кнопки «Завершить турнир»</div>'}
@@ -607,8 +652,8 @@ function renderSetup(app){
         :`У каждого будет ровно <b>${P.games}</b> ${plural(P.games,'игра','игры','игр')}${n-P.act?` · в раунде отдыхают ${n-P.act}, по очереди`:''}`}.</div>`;
   }
   app.innerHTML=`
-  <div class="topbar"><button class="iconbtn" data-a="home" aria-label="На главную">${IC.home}</button><div style="flex:1"></div></div>
-  <div class="eyebrow" style="margin-top:14px">Новый турнир</div>
+  <div class="topbar"><button class="iconbtn" data-a="new" aria-label="Назад">${IC.home}</button><div style="flex:1"></div></div>
+  <div class="eyebrow" style="margin-top:14px">Падел · новый турнир</div>
   <h1 class="big">Настройка</h1>
   <div class="stack" style="margin-top:14px">
     <section class="card">
@@ -665,8 +710,8 @@ function renderSetup(app){
 function defaultName(d){return `${FMT[d.format]} · ${dateRu(Date.now())}`}
 
 function addNames(text){
-  const d=store.draft;if(d.sample){d.players=[];d.sample=false}
-  const list=text.split(PAIRF(d.format)?/[\n,;+\/]+/:/[\n,;]+/).map(s=>s.trim()).filter(Boolean);
+  const d=curDraft();if(d.sample){d.players=[];d.sample=false}
+  const list=text.split(isPairInput(d)?/[\n,;+\/]+/:/[\n,;]+/).map(s=>s.trim()).filter(Boolean);
   if(!list.length){$('#e-names').textContent='Введите имя';return}
   const skipped=[];
   list.forEach(n=>{if(d.players.some(p=>p.toLowerCase()===n.toLowerCase()))skipped.push(n);else d.players.push(n.slice(0,40))});
@@ -838,9 +883,15 @@ function wrapLines(x,t,max,maxLines){
   if(lines.length>maxLines){const keep=lines.slice(0,maxLines);keep[maxLines-1]=fitText(x,keep[maxLines-1]+' '+lines.slice(maxLines).join(' '),max);return keep}
   return lines.map(l=>fitText(x,l,max));
 }
+function padelCardData(T){
+  const {st}=standings(T),champs=st.filter(s=>s.p1===1),pairsF=PAIRF(T.format);
+  return {sport:'ПАДЕЛ',meta:`${FMT[T.format]} · ${dateRu(T.finishedAt||T.createdAt)} · до ${T.cfg.limit}`,champLabel:pairsF||champs.length>1?'ЧЕМПИОНЫ':'ЧЕМПИОН',
+    champ:champs.map(s=>s.name).join(pairsF?', ':' и '),champSub:`Δ ${fmtD(st[0].d)} · ${st[0].f}:${st[0].a}`,head:[pairsF?'ПАРА':'ИГРОК','Δ'],
+    rows:st.map(s=>({name:s.name,place:s.place,p1:s.p1,tie:s.tie,mid:`${s.f}:${s.a}`,pill:fmtD(s.d),kind:s.d>0?'pos':s.d<0?'neg':'zero',sub:'Δ '+fmtD(s.d)})),foot:'Места — по Δ (забито − пропущено)'};
+}
 async function resultCard(T){
   try{await Promise.all(['800 64px Unbounded','700 30px Unbounded','800 30px Manrope','700 28px Manrope'].map(f=>document.fonts.load(f,'Падел турниры ABC')))}catch(e){}
-  const {st}=standings(T),champs=st.filter(s=>s.p1===1),pairsF=PAIRF(T.format);
+  const D0=T.sport==='tt'?ttCardData(T):padelCardData(T),st=D0.rows;
   const W=1080,P=72,rowH=72,HMAX=1400+st.length*rowH;
   const c=document.createElement('canvas');c.width=W;c.height=HMAX;const x=c.getContext('2d');
   const C={court:'#1638E8',ball:'#DFFF2F',ink:'#0A1240',paper:'#FFFFFF',mist:'#EEF1FF',mute:'#6A72A6',gold:'#FFC93C',silver:'#C9D0E6',bronze:'#F0A36B',posBg:'#DDF7EA',posFg:'#0B7A47',negBg:'#FFE5E2',negFg:'#C2281B'};
@@ -848,40 +899,40 @@ async function resultCard(T){
   x.fillStyle=C.court;x.fillRect(0,0,W,HMAX);
   x.fillStyle='rgba(255,255,255,.10)';x.fillRect(W/2-3,0,6,HMAX);x.fillRect(0,420,W,6);x.fillRect(0,HMAX*.62,W,6);
   let y=118;
-  x.fillStyle=C.ball;x.font='800 28px '+B;x.fillText('ПАДЕЛ · ИТОГИ ТУРНИРА',P,y);
+  x.fillStyle=C.ball;x.font='800 28px '+B;x.fillText('PADLA TOUR · '+D0.sport,P,y);
   x.fillStyle=C.paper;x.font='800 60px '+D;
   wrapLines(x,T.name,W-2*P,2).forEach(l=>{y+=78;x.fillText(l,P,y)});
   y+=58;x.fillStyle='rgba(255,255,255,.82)';x.font='700 30px '+B;
-  x.fillText(fitText(x,`${FMT[T.format]} · ${dateRu(T.finishedAt||T.createdAt)} · до ${T.cfg.limit}`,W-2*P),P,y);
-  y+=92;x.fillStyle=C.ball;x.font='800 28px '+B;x.fillText(pairsF||champs.length>1?'ЧЕМПИОНЫ':'ЧЕМПИОН',P,y);
+  x.fillText(fitText(x,D0.meta,W-2*P),P,y);
+  y+=92;x.fillStyle=C.ball;x.font='800 28px '+B;x.fillText(D0.champLabel,P,y);
   x.font='800 66px '+D;
-  wrapLines(x,champs.map(s=>s.name).join(pairsF?', ':' и '),W-2*P,2).forEach(l=>{y+=84;x.fillText(l,P,y)});
-  y+=48;x.fillStyle='rgba(255,255,255,.82)';x.font='700 30px '+B;x.fillText(`Δ ${fmtD(st[0].d)} · ${st[0].f}:${st[0].a}`,P,y);
+  wrapLines(x,D0.champ,W-2*P,2).forEach(l=>{y+=84;x.fillText(l,P,y)});
+  y+=48;x.fillStyle='rgba(255,255,255,.82)';x.font='700 30px '+B;x.fillText(D0.champSub,P,y);
   /* podium */
   y+=50;const podTop=y,podH=430;
   x.fillStyle=C.paper;rrect(x,P,podTop,W-2*P,podH,40);x.fill();
-  const top=st.slice(0,3),gap=24,bw=(W-2*P-2*40-2*gap)/3,hs=[250,190,140],cols=[C.gold,C.silver,C.bronze];
+  const top=T.sport==='tt'?[1,2,3].map(p=>st.find(r=>r.p1===p)):st.slice(0,3),gap=24,bw=(W-2*P-2*40-2*gap)/3,hs=[250,190,140],cols=[C.gold,C.silver,C.bronze];
   [1,0,2].forEach((i,slot)=>{const s=top[i];if(!s)return;
     const bx=P+40+slot*(bw+gap),bh=hs[i],by=podTop+podH-30-bh;
     x.fillStyle=cols[Math.min(s.p1,3)-1];rrect(x,bx,by,bw,bh,26);x.fill();
     x.fillStyle=C.ink;x.textAlign='center';x.font='800 54px '+D;x.fillText(s.place,bx+bw/2,by+72);
-    x.font='800 26px '+B;x.fillText('Δ '+fmtD(s.d),bx+bw/2,by+112);
+    x.font='800 26px '+B;x.fillText(s.sub,bx+bw/2,by+112);
     x.font='800 28px '+B;wrapLines(x,s.name,bw,2).reverse().forEach((l,li)=>x.fillText(l,bx+bw/2,by-20-li*34));
     x.textAlign='left'});
   /* table */
   y=podTop+podH+36;const tTop=y,tH=90+st.length*rowH+30;
   x.fillStyle=C.paper;rrect(x,P,tTop,W-2*P,tH,40);x.fill();
-  x.fillStyle=C.mute;x.font='800 24px '+B;x.fillText(pairsF?'ПАРА':'ИГРОК',P+40,tTop+62);x.textAlign='right';x.fillText('Δ',W-P-40,tTop+62);x.textAlign='left';
+  x.fillStyle=C.mute;x.font='800 24px '+B;x.fillText(D0.head[0],P+40,tTop+62);x.textAlign='right';x.fillText(D0.head[1],W-P-40,tTop+62);x.textAlign='left';
   st.forEach((s,k)=>{const ry=tTop+90+k*rowH;
     if(k){x.fillStyle=C.mist;x.fillRect(P+40,ry,W-2*P-80,3)}
     const bc=s.p1<=3?cols[s.p1-1]:C.mist;x.fillStyle=bc;rrect(x,P+40,ry+12,52,48,14);x.fill();
     x.fillStyle=C.ink;x.textAlign='center';x.font=(s.tie?'800 17px ':'800 22px ')+D;x.fillText(s.place,P+66,ry+44);x.textAlign='left';
     x.font='800 30px '+B;x.fillText(fitText(x,s.name,W-2*P-420),P+112,ry+46);
-    x.fillStyle=C.mute;x.font='700 24px '+B;x.textAlign='right';x.fillText(`${s.f}:${s.a}`,W-P-180,ry+45);
-    const pos=s.d>0,neg=s.d<0;x.fillStyle=pos?C.posBg:neg?C.negBg:C.mist;rrect(x,W-P-40-120,ry+12,120,48,14);x.fill();
-    x.fillStyle=pos?C.posFg:neg?C.negFg:C.mute;x.textAlign='center';x.font='800 24px '+D;x.fillText(fmtD(s.d),W-P-40-60,ry+45);x.textAlign='left'});
+    x.fillStyle=C.mute;x.font='700 24px '+B;x.textAlign='right';x.fillText(s.mid,W-P-180,ry+45);
+    const pos=s.kind==='pos',neg=s.kind==='neg';x.fillStyle=pos?C.posBg:neg?C.negBg:C.mist;rrect(x,W-P-40-120,ry+12,120,48,14);x.fill();
+    x.fillStyle=pos?C.posFg:neg?C.negFg:C.mute;x.textAlign='center';x.font='800 24px '+D;x.fillText(s.pill,W-P-40-60,ry+45);x.textAlign='left'});
   y=tTop+tH+70;
-  x.fillStyle='rgba(255,255,255,.75)';x.font='700 26px '+B;x.fillText('Места — по Δ (забито − пропущено)',P,y);
+  x.fillStyle='rgba(255,255,255,.75)';x.font='700 26px '+B;x.fillText(D0.foot,P,y);
   const H=y+56,out=document.createElement('canvas');out.width=W;out.height=H;out.getContext('2d').drawImage(c,0,0);
   return await new Promise(res=>out.toBlob(b=>res(b),'image/png'));
 }
@@ -889,7 +940,7 @@ async function shareResults(T){
   toast('Готовлю картинку…');
   let blob=null;try{blob=await resultCard(T)}catch(e){}
   if(!blob)return copyResults(T);
-  const file=new File([blob],'padel-itogi.png',{type:'image/png'});
+  const file=new File([blob],'padla-tour-itogi.png',{type:'image/png'});
   const url=URL.createObjectURL(blob);
   let canShare=false;try{canShare=!!(navigator.canShare&&navigator.canShare({files:[file]}))}catch(e){}
   const acts=[];
@@ -898,6 +949,726 @@ async function shareResults(T){
   sheet('Итоги турнира',canShare?'Выберите Telegram и свой канал — или сохраните картинку в «Фото».':'Нажмите на картинку и удерживайте, чтобы сохранить её, затем опубликуйте в канале.',acts,
     `<img src="${url}" alt="Итоги турнира ${esc(T.name)}" style="width:100%;border-radius:16px;margin-bottom:8px;display:block;-webkit-touch-callout:default">`);
 }
+
+/* ================= table tennis: engine (no DOM) ================= */
+const TT_UNIT={single:'Одиночный',pair:'Постоянные пары',rotate:'Пары со сменой партнёров'};
+const TT_SCHEME={rr:'Круговой',groups:'Группы + плей-офф',ko:'Олимпийская сетка',rotate:'Американо'};
+const TT_MIN={rr:3,ko:3,groups:6};
+let ttPrev={key:'',sched:null};
+function freshTTDraft(){return {name:'',unit:'single',scheme:null,players:[],pts:11,wins:{g:2,ko:3,f:3},rwins:1,tables:2,cycles:null,groupCount:null,advance:2,third:true,consolation:false,seeding:'random',rounds:null}}
+/* entrants: players (single, rotate) or fixed pairs */
+const ttEntrantCount=d=>d.unit==='pair'?Math.floor(d.players.length/2):d.players.length;
+function ttMaxTables(d){const n=ttEntrantCount(d);return Math.max(1,d.unit==='rotate'?Math.floor(n/4):Math.floor(n/2))}
+const ttTables=d=>Math.max(1,Math.min(d.tables||1,ttMaxTables(d)));
+function ttGroupOptions(n){const out=[];for(let g=2;g<=Math.floor(n/3);g++){if(Math.floor(n/g)>=3&&Math.ceil(n/g)<=6)out.push(g)}return out}
+function ttDefaultGroups(n){const o=ttGroupOptions(n);if(!o.length)return null;return o.reduce((b,g)=>Math.abs(n/g-4)<Math.abs(n/b-4)?g:b,o[0])}
+function ttRecommend(n){return n<=7?{scheme:'rr',cycles:n<=3?2:1}:{scheme:'groups',cycles:1,groupCount:ttDefaultGroups(n),advance:2}}
+function ttGroupSizes(n,g){const s=Array(g).fill(Math.floor(n/g));for(let i=0;i<n%g;i++)s[i]++;return s}
+const TT_MIN_PER_MATCH={1:7,2:13,3:22,4:32};
+const ttMatchMinutes=(wins,pts)=>Math.round((TT_MIN_PER_MATCH[wins]||13)*Math.max(.6,pts/11));
+/* everything the setup screen needs to know, and whether the tournament can start */
+function ttPlan(d){
+  const n=ttEntrantCount(d),P={n,unit:d.unit,tables:ttTables(d),maxTables:ttMaxTables(d)};
+  if(d.unit==='pair'&&d.players.length%2)return {...P,ok:false,err:'Нужно чётное число игроков — у одного нет пары'};
+  if(d.unit==='rotate'){
+    if(n<4)return {...P,ok:false,err:'Нужно минимум 4 игрока'};
+    const c=P.tables,act=activeCount(n,c),step=restStep(n,c);
+    if(n%4<2){const key=n+'#'+c;if(ttPrev.key!==key)ttPrev={key,sched:buildAmericanoFull(n,c)};
+      return {...P,ok:true,scheme:'rotate',full:true,games:n-1,rounds:ttPrev.sched.length,matches:n*(n-1)/4,minutes:ttEstimate(n*(n-1)/4,0,0,d,c)}}
+    const def=Math.ceil((n-1)/step)*step,R=(d.rounds&&d.rounds%step===0)?d.rounds:def;
+    return {...P,ok:true,scheme:'rotate',full:false,step,rounds:R,games:R*act/n,rest:n-act,matches:R*act/4,minutes:ttEstimate(R*act/4,0,0,d,c)};
+  }
+  const rec=ttRecommend(n),scheme=d.scheme||rec.scheme;P.scheme=scheme;P.recommended=rec.scheme;
+  const who=d.unit==='pair'?'пары':'игрока';
+  if(n<TT_MIN[scheme])return {...P,ok:false,err:`Для формата «${TT_SCHEME[scheme]}» нужно минимум ${TT_MIN[scheme]} ${scheme==='groups'?(d.unit==='pair'?'пар':'игроков'):who}`};
+  if(scheme==='rr'){const cy=d.cycles||rec.cycles||1,m=cy*n*(n-1)/2;return {...P,ok:true,cycles:cy,matches:m,games:cy*(n-1),minutes:ttEstimate(m,0,0,d,P.tables)}}
+  if(scheme==='ko'){let S=2;while(S<n)S*=2;const third=d.third&&n>=4?1:0,m=n-1+third;
+    return {...P,ok:true,size:S,byes:S-n,matches:m,minutes:ttEstimate(m-1-third,0,1+third,d,P.tables)}}
+  const opts=ttGroupOptions(n),g=opts.includes(d.groupCount)?d.groupCount:ttDefaultGroups(n);
+  const sizes=ttGroupSizes(n,g),adv=Math.min(d.advance||2,2),q=g*adv;
+  let gm=0;sizes.forEach(s=>gm+=s*(s-1)/2);
+  const third=d.third&&q>=4?1:0,ko=q-1+third,rest=n-q,cons=d.consolation&&rest>=2?rest-1:0;
+  return {...P,ok:true,groupOptions:opts,groupCount:g,sizes,advance:adv,qualifiers:q,matches:gm+ko+cons,groupMatches:gm,koMatches:ko,consMatches:cons,
+    minutes:ttEstimate(gm,ko-1-third+cons,1+third,d,P.tables)};
+}
+function ttEstimate(gMatches,koMatches,finals,d,tables){
+  const p=d.pts||11,mins=gMatches*ttMatchMinutes(d.unit==='rotate'?d.rwins:d.wins.g,p)+koMatches*ttMatchMinutes(d.wins.ko,p)+finals*ttMatchMinutes(d.wins.f,p);
+  return Math.round(mins/Math.max(1,tables)*1.15);
+}
+const fmtMinutes=m=>m<60?`${m} мин`:`${Math.floor(m/60)} ч${m%60?` ${m%60} мин`:''}`;
+
+/* ---------- game / match score rules (ITTF): a game is won at `pts` with a 2-point lead ---------- */
+function ttGameErr(x,y,pts){
+  if(x===''||y===''||x==null||y==null)return 'Введите счёт партии';
+  x=Number(x);y=Number(y);
+  if(!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0)return 'Счёт — целые числа от 0';
+  if(x>99||y>99)return 'Слишком большой счёт';
+  if(x===y)return 'В партии не бывает ничьей';
+  const w=Math.max(x,y),l=Math.min(x,y);
+  if(w<pts)return `Партия идёт до ${pts} очков`;
+  if(l<=pts-2&&w!==pts)return `При ${l} у проигравшего победитель набирает ровно ${pts}`;
+  if(l>=pts-1&&w!==l+2)return `После ${pts-1}:${pts-1} нужен отрыв в 2 очка — например ${l+2}:${l}`;
+  return null;
+}
+/* games: [[a,b],...]; need = wins needed. Returns {err} or {win:'a'|'b'} */
+function ttMatchCheck(games,need,pts){
+  if(!games.length)return {err:'Введите счёт хотя бы одной партии'};
+  let wa=0,wb=0;
+  for(let i=0;i<games.length;i++){
+    if(wa===need||wb===need)return {err:`Матч уже закончился после ${i}-й партии — лишняя партия`};
+    const e=ttGameErr(games[i][0],games[i][1],pts);if(e)return {err:`Партия ${i+1}: ${e}`};
+    if(+games[i][0]>+games[i][1])wa++;else wb++;
+  }
+  if(wa<need&&wb<need)return {err:`Матч идёт до ${need} ${plural(need,'победы','побед','побед')} в партиях — сейчас ${wa}:${wb}`};
+  return {win:wa>wb?'a':'b',wa,wb};
+}
+const ttNeed=(T,m)=>T.unit==='rotate'?T.cfg.rwins:m.final?T.cfg.wins.f:(m.ph==='ko'||m.ph==='third'||m.ph==='cons')?T.cfg.wins.ko:T.cfg.wins.g;
+
+/* ---------- live scoring: who serves, when to change ends ---------- */
+/* state: {games:[[a,b]...], cur:[a,b], first:'a'|'b' (singles: side serving first in game 1), dbl:{s,r} player ids for doubles game 1, hist:[]} */
+function ttServeInfo(T,m,L){
+  const pts=T.cfg.pts,g=L.games.length,[a,b]=L.cur,t=a+b,need=ttNeed(T,m);
+  const dz=2*(pts-1);const block=t<dz?Math.floor(t/2):(pts-1)+(t-dz);
+  const deciding=g===2*need-2;
+  const sideFirst=g%2===0?L.first:(L.first==='a'?'b':'a');
+  const info={deciding};
+  if(!L.dbl){info.server=(block%2===0)?sideFirst:(sideFirst==='a'?'b':'a');return info}
+  /* doubles: cycle S→R→S'→R'; next game the previous first receiver serves first to the player who served to him */
+  const pa=ttSide(T,m,'a'),pb=ttSide(T,m,'b'),partner=p=>pa.includes(p)?pa.find(x=>x!==p):pb.find(x=>x!==p);
+  let S=L.dbl.s,R=L.dbl.r;
+  for(let i=0;i<g;i++){const ns=R,nr=S;S=ns;R=nr}
+  let cyc=[S,R,partner(S),partner(R)];
+  /* deciding game: when a side first reaches 5, the receiving pair changes its order */
+  if(deciding&&L.switchAt!=null&&t>=L.switchAt){
+    const b0=L.switchBlock,s0=cyc[b0%4],r0=cyc[(b0+1)%4],c2=[];
+    c2[b0%4]=s0;c2[(b0+1)%4]=partner(r0);c2[(b0+2)%4]=partner(s0);c2[(b0+3)%4]=r0;cyc=c2;
+  }
+  info.server=cyc[block%4];info.receiver=cyc[(block+1)%4];
+  info.serverSide=pa.includes(info.server)?'a':'b';
+  return info;
+}
+function ttLivePoint(T,m,L,side){
+  const pts=T.cfg.pts,need=ttNeed(T,m);
+  L.hist.push(JSON.stringify({games:L.games,cur:L.cur,switchAt:L.switchAt,switchBlock:L.switchBlock}));
+  L.cur=L.cur.slice();L.cur[side==='a'?0:1]++;
+  const [a,b]=L.cur,t=a+b,deciding=L.games.length===2*need-2;
+  const events=[];
+  if(deciding&&L.switchAt==null&&(a===5||b===5)&&Math.max(a,b)===5&&Math.min(a,b)<5){
+    L.switchAt=t;const dz=2*(pts-1);L.switchBlock=t<dz?Math.floor(t/2):(pts-1)+(t-dz);events.push('ends');
+  }
+  const w=Math.max(a,b),l=Math.min(a,b);
+  if(w>=pts&&w-l>=2){
+    L.games=L.games.concat([[a,b]]);L.cur=[0,0];L.switchAt=null;L.switchBlock=null;
+    const wa=L.games.filter(x=>x[0]>x[1]).length,wb=L.games.length-wa;
+    if(wa===need||wb===need)events.push('match');else events.push('game');
+  }
+  return events;
+}
+function ttLiveUndo(L){if(!L.hist.length)return false;const s=JSON.parse(L.hist.pop());L.games=s.games;L.cur=s.cur;L.switchAt=s.switchAt;L.switchBlock=s.switchBlock;return true}
+
+/* ---------- building the tournament ---------- */
+function ttSide(T,m,s){const v=s==='a'?m.a:m.b;if(v==null)return [];return T.unit==='rotate'?v:T.entrants[v].m}
+function ttSideName(T,m,s){const v=s==='a'?m.a:m.b;if(v==null)return m['wait'+s]||'—';return T.unit==='rotate'?v.map(p=>T.players[p]).join(' / '):T.entrants[v].name}
+function ttNewMatch(T,ph,o){const m={id:T.seq++,ph,a:null,b:null,games:[],st:'open',win:null,wo:null,table:null,...o};T.matches.push(m);return m}
+/* round robin with the circle method; the round where the two top seeds meet goes last */
+function ttRRMatches(T,list,ph,g,cycles){
+  const n=list.length,ids=list.slice();if(n%2)ids.push(-1);const m=ids.length,rounds=[];
+  for(let r=0;r<m-1;r++){const pairs=[];
+    const add=(x,y)=>{if(ids[x]>=0&&ids[y]>=0)pairs.push([ids[x],ids[y]])};
+    add(m-1,r);for(let i=1;i<m/2;i++)add((r+i)%(m-1),(r-i+m-1)%(m-1));rounds.push(pairs)}
+  const top=rounds.findIndex(p=>p.some(([x,y])=>(x===list[0]&&y===list[1])||(x===list[1]&&y===list[0])));
+  if(top>=0)rounds.push(rounds.splice(top,1)[0]);
+  let r0=0;
+  for(let c=0;c<(cycles||1);c++)rounds.forEach((pairs,ri)=>{pairs.forEach(([x,y])=>ttNewMatch(T,ph,{g,r:r0+ri,a:c%2?y:x,b:c%2?x:y}));});
+}
+function ttSeedOrder(S){let o=[1];while(o.length<S){const L=o.length*2,n=[];o.forEach(s=>{n.push(s,L+1-s)});o=n}return o}
+/* single-elimination bracket for `list` (entrant ids in seed order); byes go to the top seeds */
+function ttKO(T,list,ph,third){
+  const n=list.length;let S=2;while(S<n)S*=2;const order=ttSeedOrder(S),R=Math.log2(S);
+  const rounds=[[]];
+  for(let i=0;i<S/2;i++){const sa=order[2*i],sb=order[2*i+1];
+    rounds[0].push(ttNewMatch(T,ph,{r:0,a:sa<=n?list[sa-1]:null,b:sb<=n?list[sb-1]:null,ra:true,rb:true,rounds:R}))}
+  for(let r=1;r<R;r++){rounds[r]=[];const prev=rounds[r-1];
+    for(let i=0;i<prev.length/2;i++)rounds[r].push(ttNewMatch(T,ph,{r,src:{a:{w:prev[2*i].id},b:{w:prev[2*i+1].id}},rounds:R}))}
+  const fin=rounds[R-1][0];if(ph==='ko')fin.final=true;
+  if(third&&R>=2){const semis=rounds[R-2];ttNewMatch(T,ph==='ko'?'third':ph+'3',{r:R-1,src:{a:{l:semis[0].id},b:{l:semis[1].id}},rounds:R,isThird:true})}
+}
+function ttStartPlay(d,id){
+  const n=ttEntrantCount(d),P=ttPlan(d);if(!P.ok)return {err:P.err};
+  const T={id,sport:'tt',name:'',unit:d.unit,scheme:P.scheme,players:d.players.slice(),entrants:[],matches:[],seq:1,
+    cfg:{pts:d.pts,wins:{...d.wins},rwins:d.rwins,tables:P.tables,cycles:P.cycles||1,groupCount:P.groupCount||null,advance:P.advance||null,third:!!d.third,consolation:!!d.consolation,seeding:d.seeding},
+    stage:'play',status:'active',planned:P.matches};
+  if(d.unit==='pair')for(let i=0;i<n;i++)T.entrants.push({name:d.players[2*i]+' / '+d.players[2*i+1],m:[2*i,2*i+1]});
+  else T.players.forEach((p,i)=>T.entrants.push({name:p,m:[i]}));
+  T.entrants.forEach(e=>e.lot=Math.random());
+  const seeded=d.seeding==='manual'?[...Array(n).keys()]:shuffle([...Array(n).keys()]);
+  T.entrants.forEach((e,i)=>e.seed=seeded.indexOf(i)+1);
+  if(P.scheme==='rotate'){
+    const sched=P.full?clone(ttPrev.sched):buildEqualGames(n,P.tables,P.rounds);ttPrev={key:'',sched:null};
+    sched.forEach((R,ri)=>R.matches.forEach(mm=>ttNewMatch(T,'am',{r:ri,a:mm.t1.slice(),b:mm.t2.slice()})));
+    T.rounds=sched.length;
+  }else if(P.scheme==='rr')ttRRMatches(T,seeded,'rr',null,P.cycles);
+  else if(P.scheme==='ko')ttKO(T,seeded,'ko',d.third&&n>=4);
+  else{
+    const g=P.groupCount;T.groups=[...Array(g)].map(()=>[]);
+    seeded.forEach((e,i)=>{const row=Math.floor(i/g),col=i%g;T.groups[row%2?g-1-col:col].push(e)});
+    T.groups.forEach((list,gi)=>ttRRMatches(T,list,'g',gi,1));
+    T.groupStage=true;
+  }
+  ttPropagate(T);ttAssignTables(T);
+  return {T};
+}
+
+/* ---------- results flow ---------- */
+const ttDone=m=>m.st==='done';
+const ttOut=(T,e)=>T.unit!=='rotate'&&e!=null&&T.entrants[e].out;
+function ttWinnerOf(m){if(!ttDone(m)||!m.win)return null;return m.win==='a'?m.a:m.b}
+function ttLoserOf(m){if(!ttDone(m)||!m.win||m.bye)return null;return m.win==='a'?m.b:m.a}
+/* fill bracket slots from finished matches, auto-advance byes and withdrawn players; repeat until stable */
+function ttPropagate(T){
+  let changed=true,guard=0;
+  while(changed&&guard++<200){changed=false;
+    T.matches.forEach(m=>{
+      if(m.src)['a','b'].forEach(s=>{const k='r'+s;if(m[k])return;const src=m.src[s],sm=T.matches.find(x=>x.id===(src.w??src.l));
+        if(sm&&ttDone(sm)){m[s]=src.w!=null?ttWinnerOf(sm):ttLoserOf(sm);m[k]=true;changed=true}});
+      if(m.st!=='done'&&(m.ra||!m.src)&&(m.rb||!m.src)){
+        const A=m.a,B=m.b;
+        if(m.src||m.ph==='ko'||m.ph==='cons'){
+          if(A==null&&B==null){m.st='done';m.bye=true;m.win=null;changed=true;return}
+          if(A==null||B==null){m.st='done';m.bye=true;m.win=A==null?'b':'a';changed=true;return}
+        }
+        if(T.unit!=='rotate'&&A!=null&&B!=null&&(ttOut(T,A)||ttOut(T,B))&&!m.live){
+          m.st='done';m.games=[];m.wo=ttOut(T,A)?(ttOut(T,B)?'ab':'a'):'b';m.win=m.wo==='a'?'b':m.wo==='b'?'a':null;
+          if(m.wo==='ab'){m.bye=true;m.win=null}changed=true}
+      }
+    });
+  }
+  if(T.groupStage&&T.matches.filter(m=>m.ph==='g').every(ttDone)&&!T.matches.some(m=>m.ph==='ko'))ttMakePlayoff(T);
+  const left=T.matches.filter(m=>!ttDone(m));
+  if(!left.length&&T.stage==='play'){T.stage='results'}
+}
+function ttMakePlayoff(T){
+  const ranks=T.groups.map((list,gi)=>ttRank(T,list,T.matches.filter(m=>m.ph==='g'&&m.g===gi)).order);
+  const adv=T.cfg.advance,firsts=ranks.map(r=>r[0]),seconds=adv>1?ranks.map(r=>r[1]):[];
+  let best=null,bestCost=1e9;
+  const tryOrder=sec=>{const list=firsts.concat(sec);const c=ttSameGroupCost(T,list);if(c<bestCost){bestCost=c;best=list}};
+  if(seconds.length<=7)ttPermute(seconds).forEach(tryOrder);else for(let k=0;k<seconds.length;k++){tryOrder(seconds.slice(k).concat(seconds.slice(0,k)));tryOrder(seconds.slice(k).concat(seconds.slice(0,k)).reverse())}
+  ttKO(T,best||firsts.concat(seconds),'ko',T.cfg.third&&best.length>=4);
+  if(T.cfg.consolation){const rest=[];for(let p=adv;p<6;p++)ranks.forEach(r=>{if(r[p]!=null)rest.push(r[p])});if(rest.length>=2)ttKO(T,rest,'cons',false)}
+  T.groupRanks=ranks;
+}
+function ttPermute(a){if(a.length<=1)return [a.slice()];const out=[];a.forEach((x,i)=>ttPermute(a.slice(0,i).concat(a.slice(i+1))).forEach(p=>out.push([x].concat(p))));return out}
+/* players from one group should meet as late as possible in the bracket */
+function ttSameGroupCost(T,list){
+  const n=list.length;let S=2;while(S<n)S*=2;const order=ttSeedOrder(S),pos={};order.forEach((s,i)=>pos[s]=i);
+  const R=Math.log2(S),grp=e=>T.groups.findIndex(g=>g.includes(e));let cost=0;
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(grp(list[i])===grp(list[j])){let a=pos[i+1],b=pos[j+1],r=0;while(a!==b){a>>=1;b>>=1;r++}cost+=Math.pow(10,R-r)}
+  return cost;
+}
+function ttAssignTables(T){
+  const busy=new Set(),used=new Set();
+  T.matches.forEach(m=>{if(m.st!=='done'&&m.table!=null){used.add(m.table);ttSide(T,m,'a').concat(ttSide(T,m,'b')).forEach(p=>busy.add(p))}else if(m.st==='done')m.table=null});
+  const prio=m=>(m.ph==='g'||m.ph==='rr'||m.ph==='am'?0:m.ph==='cons'?1:2)*1000+(m.r||0)*10+(m.isThird?1:0);
+  const ready=T.matches.filter(m=>m.st!=='done'&&m.table==null&&m.a!=null&&m.b!=null).sort((x,y)=>prio(x)-prio(y)||x.id-y.id);
+  for(const m of ready){
+    let free=null;for(let t=1;t<=T.cfg.tables;t++)if(!used.has(t)){free=t;break}
+    if(free==null)break;
+    const ps=ttSide(T,m,'a').concat(ttSide(T,m,'b'));if(ps.some(p=>busy.has(p)))continue;
+    m.table=free;used.add(free);ps.forEach(p=>busy.add(p));
+  }
+}
+/* record a result; games already validated */
+function ttSetResult(T,m,games,win,wo){
+  m.games=games;m.win=win;m.wo=wo||null;m.st='done';m.live=null;m.table=null;
+  ttPropagate(T);ttAssignTables(T);
+}
+/* can this finished match still be corrected without breaking later rounds? */
+function ttCanEdit(T,m){
+  if(m.bye)return {ok:false,why:'Это пропуск круга — счёта нет'};
+  if(m.wo&&T.unit!=='rotate'&&(ttOut(T,m.a)||ttOut(T,m.b)))return {ok:false,why:'Игрок снят с турнира — техническое поражение не исправляется'};
+  if(m.ph==='g'&&T.matches.some(x=>(x.ph==='ko'||x.ph==='cons'||x.ph==='third')&&ttDone(x)&&!x.bye))return {ok:false,why:'Плей-офф уже начался — результаты групп изменить нельзя'};
+  const dep=T.matches.filter(x=>x.src&&((x.src.a&&(x.src.a.w===m.id||x.src.a.l===m.id))||(x.src.b&&(x.src.b.w===m.id||x.src.b.l===m.id))));
+  if(dep.some(x=>ttDone(x)&&!x.bye))return {ok:false,why:'Следующий матч сетки уже сыгран — сначала исправьте его'};
+  return {ok:true};
+}
+function ttReopen(T,m){
+  const reset=x=>{T.matches.filter(y=>y.src&&((y.src.a&&(y.src.a.w===x.id||y.src.a.l===x.id))||(y.src.b&&(y.src.b.w===x.id||y.src.b.l===x.id)))).forEach(y=>{
+    ['a','b'].forEach(s=>{const src=y.src[s];if(src.w===x.id||src.l===x.id){y[s]=null;y['r'+s]=false}});
+    if(y.st==='done'){y.st='open';y.win=null;y.bye=false;y.wo=null;y.games=[];reset(y)}})};
+  if(m.ph==='g'&&T.matches.some(x=>x.ph==='ko'||x.ph==='cons'||x.ph==='third')){T.matches=T.matches.filter(x=>x.ph==='g'||x.ph==='rr'||x.ph==='am');T.groupRanks=null}
+  reset(m);m.st='open';m.win=null;m.wo=null;m.games=[];m.table=null;T.stage='play';
+  ttPropagate(T);ttAssignTables(T);
+}
+function ttWithdraw(T,e){
+  T.entrants[e].out=true;
+  T.matches.forEach(m=>{if(m.st!=='done'&&(m.a===e||m.b===e)){m.live=null}});
+  ttPropagate(T);ttAssignTables(T);
+}
+
+/* ---------- standings (ITTF 3.7.5): match points 2 / 1 / 0, ties by results between the tied players ---------- */
+function ttTally(T,ids,matches,key){
+  const s={};ids.forEach(e=>s[key(e)]={mp:0,w:0,l:0,gw:0,gl:0,pw:0,pl:0,g:0});
+  matches.forEach(m=>{if(!ttDone(m)||m.bye||!m.win)return;
+    const A=T.unit==='rotate'?m.a:[m.a],B=T.unit==='rotate'?m.b:[m.b];
+    const apply=(list,won,wo)=>list.forEach(e=>{const o=s[key(e)];if(!o)return;o.g++;if(won){o.w++;o.mp+=2}else{o.l++;o.mp+=wo?0:1}});
+    const aWon=m.win==='a';apply(A,aWon,m.wo==='a');apply(B,!aWon,m.wo==='b');
+    if(!m.wo)m.games.forEach(([x,y])=>{A.forEach(e=>{const o=s[key(e)];if(!o)return;o.pw+=+x;o.pl+=+y;if(+x>+y)o.gw++;else o.gl++});
+      B.forEach(e=>{const o=s[key(e)];if(!o)return;o.pw+=+y;o.pl+=+x;if(+y>+x)o.gw++;else o.gl++})});
+  });
+  return s;
+}
+const ttRatio=(a,b)=>b===0?(a===0?1:Infinity):a/b;
+function ttRank(T,ids,matches){
+  const key=e=>e;const tieInfo={};
+  const resolve=(sub)=>{
+    if(sub.length<=1)return sub;
+    const inner=matches.filter(m=>sub.includes(m.a)&&sub.includes(m.b));
+    const s=ttTally(T,sub,inner,key);
+    const crit=[e=>s[e].mp,e=>ttRatio(s[e].gw,s[e].gl),e=>ttRatio(s[e].pw,s[e].pl)];
+    for(const c of crit){
+      const vals=[...new Set(sub.map(c))];
+      if(vals.length>1){vals.sort((x,y)=>y-x);return vals.flatMap(v=>resolve(sub.filter(e=>c(e)===v)))}
+    }
+    sub.forEach(e=>tieInfo[e]=true);
+    return sub.slice().sort((x,y)=>T.entrants[x].lot-T.entrants[y].lot);
+  };
+  const all=ttTally(T,ids,matches,key);
+  const byMp=[...new Set(ids.map(e=>all[e].mp))].sort((x,y)=>y-x);
+  const order=byMp.flatMap(v=>resolve(ids.filter(e=>all[e].mp===v)));
+  return {order,stats:all,lot:tieInfo};
+}
+/* rotating partners: individual table, overall ratios (no head-to-head between changing pairs) */
+function ttRankPlayers(T){
+  const ids=T.players.map((p,i)=>i),s=ttTally(T,ids,T.matches,e=>e);
+  const order=ids.slice().sort((x,y)=>s[y].mp-s[x].mp||ttRatio(s[y].gw,s[y].gl)-ttRatio(s[x].gw,s[x].gl)||ttRatio(s[y].pw,s[y].pl)-ttRatio(s[x].pw,s[x].pl)||T.entrants[x].lot-T.entrants[y].lot);
+  return {order,stats:s};
+}
+/* final places for the whole tournament: [{e,name,place,p1,tie,st}] */
+function ttFinal(T){
+  const rows=[];
+  const statsAll=T.unit==='rotate'?ttTally(T,T.players.map((p,i)=>i),T.matches,e=>e):ttTally(T,T.entrants.map((x,i)=>i),T.matches,e=>e);
+  const push=(list,start)=>{list.forEach(e=>rows.push({e,name:T.entrants[e].name,p1:start,place:list.length>1?`${start}–${start+list.length-1}`:String(start),tie:list.length>1,st:statsAll[e]}))};
+  if(T.scheme==='rotate'||T.scheme==='rr'){
+    const R=T.scheme==='rotate'?ttRankPlayers(T):ttRank(T,T.entrants.map((x,i)=>i),T.matches);
+    R.order.forEach((e,i)=>rows.push({e,name:T.entrants[e].name,p1:i+1,place:String(i+1),st:statsAll[e],lot:R.lot&&R.lot[e]}));
+    return rows;
+  }
+  const koPlaces=(ph,thirdPh,offset)=>{
+    const ms=T.matches.filter(m=>m.ph===ph);if(!ms.length)return 0;
+    const R=ms[0].rounds,inB=new Set();ms.filter(m=>m.r===0).forEach(m=>{if(m.a!=null)inB.add(m.a);if(m.b!=null)inB.add(m.b)});
+    const lostIn={};ms.forEach(m=>{const l=ttLoserOf(m);if(l!=null)lostIn[l]=m.r});
+    const fin=ms.find(m=>m.r===R-1),champ=fin?ttWinnerOf(fin):null;
+    const th=T.matches.find(m=>m.ph===thirdPh);
+    let place=offset+1;
+    if(champ!=null){push([champ],place);place++}
+    for(let r=R-1;r>=0;r--){
+      let lost=[...inB].filter(e=>lostIn[e]===r&&e!==champ);
+      if(r===R-2&&th&&ttDone(th)&&th.win){const w=ttWinnerOf(th),l=ttLoserOf(th);if(w!=null){push([w],place);place++}if(l!=null){push([l],place);place++}lost=lost.filter(e=>e!==w&&e!==l)}
+      if(lost.length){push(lost,place);place+=lost.length}
+    }
+    const undecided=[...inB].filter(e=>!rows.some(x=>x.e===e));if(undecided.length){push(undecided,place);place+=undecided.length}
+    return place-1-offset;
+  };
+  let used=koPlaces('ko','third',0);
+  if(T.scheme==='groups'){
+    used+=koPlaces('cons','cons3',used);
+    if(T.groupRanks){const maxLen=Math.max(...T.groupRanks.map(r=>r.length));
+      for(let p=0;p<maxLen;p++){const list=T.groupRanks.map(r=>r[p]).filter(e=>e!=null&&!rows.some(x=>x.e===e));if(list.length){push(list,used+1);used+=list.length}}}
+    else{const R=ttRank(T,T.entrants.map((x,i)=>i),T.matches.filter(m=>m.ph==='g'));R.order.forEach(e=>{if(!rows.some(x=>x.e===e)){push([e],used+1);used++}})}
+  }
+  return rows;
+}
+const ttProgress=T=>{const real=T.matches.filter(m=>!m.bye||m.cancelled);return {done:real.filter(m=>ttDone(m)&&!m.cancelled).length,all:T.scheme==='groups'&&!T.matches.some(m=>m.ph==='ko')?Math.max(real.length,T.planned||0):real.length}};
+
+/* ================= sport picker ================= */
+const SPORT_IC={
+  padel:'<svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><ellipse cx="22" cy="18" rx="12" ry="14"/><path d="M28 30l9 12"/><circle cx="18" cy="14" r="1.5" fill="currentColor"/><circle cx="25" cy="14" r="1.5" fill="currentColor"/><circle cx="18" cy="21" r="1.5" fill="currentColor"/><circle cx="25" cy="21" r="1.5" fill="currentColor"/><circle cx="21.5" cy="27" r="1.5" fill="currentColor"/></svg>',
+  tt:'<svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="20" cy="20" r="13"/><path d="M29 29l10 10"/><circle cx="38" cy="12" r="4" fill="currentColor" stroke="none"/></svg>'
+};
+function renderSportPick(app){
+  app.innerHTML=`
+  <div class="topbar"><button class="iconbtn" data-a="home" aria-label="На главную">${IC.home}</button><div style="flex:1"></div></div>
+  <div class="eyebrow" style="margin-top:14px">Padla Tour</div>
+  <h1 class="big">Создай свой турнир</h1>
+  <p class="sub" style="margin:0 0 18px">Выберите вид спорта</p>
+  <div class="stack">
+    <button class="sportcard" data-a="pick" data-v="padel"><span class="sic pad">${SPORT_IC.padel}</span>
+      <span style="min-width:0"><b>Падел</b><span>Американо, Мексикано, парные форматы</span></span><span class="chev">›</span></button>
+    <button class="sportcard" data-a="pick" data-v="tt"><span class="sic tt">${SPORT_IC.tt}</span>
+      <span style="min-width:0"><b>Настольный теннис</b><span>Круг, группы + плей-офф, сетка, пары</span></span><span class="chev">›</span></button>
+  </div>`;
+}
+
+/* ================= table tennis: setup ================= */
+const curDraft=()=>store.ui.screen==='ttsetup'?store.ttdraft:store.draft;
+const isPairInput=d=>d.unit?d.unit==='pair':PAIRF(d.format);
+function ttStepper(action,val,label,hint){
+  return `<div class="row"><div><div style="font-weight:800">${label}</div>${hint?`<div class="hint" style="margin:0">${hint}</div>`:''}</div>
+    <div class="stepper"><button data-a="${action}" data-d="-1" aria-label="Меньше">−</button><span class="val">${val}</span><button data-a="${action}" data-d="1" aria-label="Больше">+</button></div></div>`;
+}
+const toggle=(action,on,label,hint)=>`<button class="toggle ${on?'on':''}" data-a="${action}" role="switch" aria-checked="${on}"><span><b>${label}</b>${hint?`<small>${hint}</small>`:''}</span><i></i></button>`;
+function renderTTSetup(app){
+  const d=store.ttdraft,n=ttEntrantCount(d),np=d.players.length,P=ttPlan(d),pairs=d.unit==='pair';
+  const unitSeg=`<div class="seg three">${['single','pair','rotate'].map(u=>`<button data-a="tt-unit" data-v="${u}" class="${d.unit===u?'on':''}">${u==='single'?'Одиночный':u==='pair'?'Постоянные пары':'Смена партнёров'}</button>`).join('')}</div>`;
+  const unitNote={single:'Каждый играет сам за себя.',pair:'Пара не меняется весь турнир и играет против других пар. Места — у пар.',
+    rotate:'Американо: каждый раунд новый партнёр, каждый сыграет в паре с каждым. Места — у каждого игрока отдельно.'}[d.unit];
+  const playersBlock=pairs?`<div class="stack" style="gap:8px">${(()=>{const out=[];for(let i=0;i<np;i+=2){const a=d.players[i],b=d.players[i+1];
+      out.push(`<div class="pairchip ${b==null?'half':''}"><span class="num">${i/2+1}</span><span class="pn">${esc(a)} + ${b==null?'<span style="color:var(--mute)">ждёт партнёра</span>':esc(b)}</span><button class="x" data-a="rmpair" data-i="${i}" aria-label="Удалить пару">✕</button></div>`)}
+      return out.join('')||'<span class="hint" style="margin:0">Добавьте минимум 3 пары</span>'})()}</div>`
+    :`<div class="chips">${d.players.map((p,i)=>`<span class="chip">${d.seeding==='manual'&&d.unit!=='rotate'?`<small class="seedno">${i+1}</small>`:''}${esc(p)}<button class="x" data-a="rm" data-i="${i}" aria-label="Удалить ${esc(p)}">✕</button></span>`).join('')||`<span class="hint" style="margin:0">Добавьте минимум ${d.unit==='rotate'?4:3} игроков</span>`}</div>`;
+  let fmtBlock='';
+  if(d.unit!=='rotate'){
+    const rec=n>=3?ttRecommend(n):null,scheme=d.scheme||(rec&&rec.scheme)||'rr';
+    const chip=sc=>{const ok=n>=TT_MIN[sc];return `<button class="fmtopt ${scheme===sc?'on':''} ${ok?'':'dim'}" data-a="tt-scheme" data-v="${sc}">
+      <b>${TT_SCHEME[sc]}${rec&&rec.scheme===sc?' <em>совет</em>':''}</b><small>${{rr:'Все со всеми. Места по победам',groups:'Группы по 3–6, лучшие — в сетку',ko:'Проиграл — выбыл'}[sc]}</small></button>`};
+    let opts='';
+    if(P.ok&&scheme==='rr')opts=ttStepper('tt-cycles',P.cycles,'Кругов',P.cycles>1?'Каждый сыграет с каждым дважды':'Каждый с каждым по разу');
+    if(P.ok&&scheme==='groups')opts=`<div class="label" style="margin-top:14px">Групп</div>
+      <div class="chips">${P.groupOptions.map(g=>`<button class="chip ${g===P.groupCount?'on':''}" data-a="tt-groups" data-v="${g}">${g} ${plural(g,'группа','группы','групп')} по ${(()=>{const z=ttGroupSizes(n,g),mn=Math.min(...z),mx=Math.max(...z);return mn===mx?mx:mn+'–'+mx})()}</button>`).join('')}</div>
+      <div class="label" style="margin-top:14px">Из группы в плей-офф</div>
+      <div class="seg"><button data-a="tt-adv" data-v="1" class="${P.advance===1?'on':''}">1 лучший</button><button data-a="tt-adv" data-v="2" class="${P.advance===2?'on':''}">2 лучших</button></div>
+      <div class="stack" style="gap:8px;margin-top:12px">${toggle('tt-third',d.third,'Матч за 3-е место')}
+      ${toggle('tt-cons',d.consolation,'Утешительная сетка','Для тех, кто не вышел из группы')}</div>`;
+    if(P.ok&&scheme==='ko')opts=`<div class="stack" style="gap:8px;margin-top:12px">${toggle('tt-third',d.third,'Матч за 3-е место')}</div>
+      ${P.byes?`<div class="info">Сетка на ${P.size}: ${P.byes} ${plural(P.byes,'сильнейший проходит','сильнейших проходят','сильнейших проходят')} первый круг без игры.</div>`:''}`;
+    fmtBlock=`<section class="card"><div class="label">Формат${n>=3?` · ${n} ${pairs?plural(n,'пара','пары','пар'):plural(n,'игрок','игрока','игроков')}`:''}</div>
+      <div class="stack" style="gap:8px">${['rr','groups','ko'].map(chip).join('')}</div>${opts}
+      <div class="label" style="margin-top:16px">Посев</div>
+      <div class="seg"><button data-a="tt-seed" data-v="random" class="${d.seeding!=='manual'?'on':''}">Жребий</button><button data-a="tt-seed" data-v="manual" class="${d.seeding==='manual'?'on':''}">По порядку списка</button></div>
+      <div class="hint">${d.seeding==='manual'?'Первым в списке — сильнейший. Сильные попадут в разные группы и половины сетки.':'Порядок определит случай.'}</div></section>`;
+  }
+  const sch=P.scheme;
+  const winsRow=(key,label)=>ttStepper('tt-wins-'+key,d.wins[key],label,`До ${d.wins[key]} ${plural(d.wins[key],'победы','побед','побед')} — максимум ${2*d.wins[key]-1} ${plural(2*d.wins[key]-1,'партия','партии','партий')}`);
+  const matchBlock=`<section class="card"><div class="label">Партия до</div>
+    <div class="chips">${[7,11,15,21].map(v=>`<button class="chip ${d.pts===v?'on':''}" data-a="tt-pts" data-v="${v}">${v}</button>`).join('')}</div>
+    <div class="hint">Побеждает тот, кто набрал ${d.pts} с отрывом в 2 очка. При ${d.pts-1}:${d.pts-1} играют до отрыва в 2.</div>
+    <div class="label" style="margin-top:16px">Матч — до побед в партиях</div>
+    ${d.unit==='rotate'?ttStepper('tt-rwins',d.rwins,'Каждый матч',`До ${d.rwins} ${plural(d.rwins,'победы','побед','побед')}`)
+      :sch==='ko'?winsRow('ko','Матчи сетки')+winsRow('f','Финал')
+      :sch==='groups'?winsRow('g','Группы')+winsRow('ko','Плей-офф')+winsRow('f','Финал')
+      :winsRow('g','Каждый матч')}
+  </section>`;
+  const tablesBlock=`<section class="card">
+    ${ttStepper('tt-tables',P.tables,'Столов',n>=2?`Максимум ${P.maxTables}${P.tables<P.maxTables?' — часть игроков будет ждать':''}`:'')}
+    ${P.ok?`<div class="info">${d.unit==='rotate'?(P.full?`Каждый сыграет в паре с каждым <b>ровно 1 раз</b> · ${P.rounds} ${plural(P.rounds,'раунд','раунда','раундов')} · по ${P.games} ${plural(P.games,'игре','игры','игр')}`
+        :`При ${n} игроках «каждый с каждым» невозможно — у всех будет поровну игр: <b>${P.games}</b>`)+'<br>':''}
+      Матчей: <b>${P.matches}</b> · примерно <b>${fmtMinutes(P.minutes)}</b> на ${P.tables} ${plural(P.tables,'столе','столах','столах')}</div>`
+      :`<div class="warn">${P.err}</div>`}
+    ${d.unit==='rotate'&&P.ok&&!P.full?ttStepper('tt-rounds',P.rounds,'Раундов',`Шаг ${P.step} — чтобы у всех было поровну игр`):''}
+  </section>`;
+  app.innerHTML=`
+  <div class="topbar"><button class="iconbtn" data-a="new" aria-label="Назад">${IC.home}</button><div style="flex:1"></div></div>
+  <div class="eyebrow" style="margin-top:14px">Настольный теннис</div>
+  <h1 class="big">Новый турнир</h1>
+  <div class="stack" style="margin-top:14px">
+    <section class="card"><div class="label">Название</div>
+      <input class="textin" id="f-name" value="${esc(d.name)}" placeholder="${esc(ttDefaultName())}" maxlength="60" autocomplete="off" aria-label="Название турнира">
+      <div class="label" style="margin-top:16px">Кто играет</div>${unitSeg}<div class="hint">${unitNote}</div></section>
+    <section class="card">
+      <div class="row" style="margin-bottom:10px"><div class="label" style="margin:0">${pairs?`Пары · ${Math.floor(np/2)}${np%2?' + 1 игрок':''}`:`Участники · ${np}`}</div>
+        ${np?'<button class="textbtn" data-a="clear" style="padding:0">Очистить</button>':''}</div>
+      ${playersBlock}
+      ${pairs&&np>=4?'<button class="textbtn" data-a="shufflepairs">Перемешать пары случайно</button>':''}
+      <form class="addbox" id="addform"><input class="textin" id="newname" placeholder="${pairs?'Анна + Борис':'Имя игрока'}" autocomplete="off" enterkeyhint="done" aria-label="Имя игрока"><button type="submit" aria-label="Добавить">+</button></form>
+      <div class="hint">${pairs?'Вводите пару через «+»: Анна + Борис. Или по одному имени — пары собираются по порядку.':'Можно вставить сразу список — через запятую или с новой строки'}</div>
+      <div class="err" id="e-names"></div></section>
+    ${fmtBlock}${matchBlock}${tablesBlock}
+    <div class="err" id="e-cfg"></div>
+    <button class="cta tt" data-a="tt-start">Начать турнир ${IC.arrow}</button>
+  </div>`;
+  const f=$('#addform'),inp=$('#newname');
+  f.addEventListener('submit',e=>{e.preventDefault();addNames(inp.value)});
+  inp.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text')||'';if(/[\n,;+\/]/.test(t)){e.preventDefault();addNames(t)}});
+  inp.addEventListener('input',()=>{$('#e-names').textContent=''});
+  $('#f-name').addEventListener('input',e=>{d.name=e.target.value;saveLocal()});
+}
+const ttDefaultName=()=>`Настольный теннис · ${dateRu(Date.now())}`;
+function ttStartFromDraft(){
+  const d=store.ttdraft,P=ttPlan(d);
+  if(!P.ok){$('#e-cfg').textContent=P.err;$('#e-cfg').scrollIntoView({block:'center',behavior:'smooth'});return}
+  if(d.players.length>48){$('#e-cfg').textContent='Максимум 48 игроков';return}
+  const id=newId(),r=ttStartPlay(d,id);
+  if(r.err){$('#e-cfg').textContent=r.err;return}
+  const T=r.T;T.name=(d.name.trim()||ttDefaultName()).slice(0,60);T.createdAt=Date.now();T.updatedAt=Date.now();
+  store.tournaments[id]=T;
+  store.ttdraft={...freshTTDraft(),players:d.players.slice(),unit:d.unit,pts:d.pts,wins:{...d.wins},rwins:d.rwins,tables:d.tables,seeding:d.seeding,third:d.third,consolation:d.consolation,advance:d.advance};
+  touch(T);go('play',id,'play');wake();
+}
+
+/* ================= table tennis: tournament screens ================= */
+const ttPhaseName=(T,m)=>{
+  if(m.ph==='g')return `Группа ${String.fromCharCode(1040+m.g)} · тур ${m.r+1}`;
+  if(m.ph==='rr')return `Тур ${m.r+1}`;
+  if(m.ph==='am')return `Раунд ${m.r+1}`;
+  if(m.ph==='third')return 'Матч за 3-е место';
+  const left=m.rounds-m.r,base=left===1?'Финал':left===2?'Полуфинал':left===3?'1/4 финала':left===4?'1/8 финала':`Круг ${m.r+1}`;
+  return m.ph==='cons'?`Утешительная · ${base.toLowerCase()}`:base;
+};
+const GRP=i=>String.fromCharCode(1040+i);
+function ttHeader(T,title){
+  const p=ttProgress(T),pct=p.all?Math.round(p.done/p.all*100):0;
+  return `<div class="topbar"><button class="iconbtn" data-a="home" aria-label="На главную">${IC.home}</button>
+    <div style="flex:1;min-width:0;text-align:center;padding-top:4px"><div class="eyebrow tt" style="overflow-wrap:anywhere">${esc(T.name)}</div>
+    <div class="sub" style="font-size:13px">${TT_SCHEME[T.scheme]} · до ${T.cfg.pts} · ${p.done}/${p.all} матчей</div></div>
+    <button class="iconbtn" data-a="tt-menu" aria-label="Меню турнира">${IC.dots}</button></div>
+    ${title}<div class="progress" aria-label="Сыграно ${pct}%"><b style="width:${pct}%;background:var(--tt)"></b></div>`;
+}
+function renderTTTabbar(T){
+  const t=store.ui.tab,res=T.stage==='results';
+  $('#tabbar').innerHTML=`<div class="tabbar"><nav aria-label="Разделы">
+    <button data-a="tab" data-v="play" class="${t==='play'?'on':''}">${res?IC.trophy:SPORT_IC.tt.replace('width="40" height="40"','')}${res?'Итоги':'Столы'}</button>
+    <button data-a="tab" data-v="table" class="${t==='table'?'on':''}">${IC.table}Таблица</button>
+    <button data-a="tab" data-v="grid" class="${t==='grid'?'on':''}">${IC.grid}Сетка</button>
+  </nav></div>`;
+}
+function renderTT(app,T){
+  if(store.ui.live!=null){const m=T.matches.find(x=>x.id===store.ui.live);if(m&&m.st!=='done'){$('#tabbar').innerHTML='';return renderTTLive(app,T,m)}store.ui.live=null}
+  renderTTTabbar(T);
+  const t=store.ui.tab;
+  if(t==='table')return renderTTTable(app,T);
+  if(t==='grid')return renderTTGrid(app,T);
+  if(T.stage==='results')return renderTTResults(app,T);
+  ttAssignTables(T);
+  const onTables=T.matches.filter(m=>m.st!=='done'&&m.table!=null).sort((a,b)=>a.table-b.table);
+  const nextUp=T.matches.filter(m=>m.st!=='done'&&m.table==null&&m.a!=null&&m.b!=null);
+  const waiting=T.matches.filter(m=>m.st!=='done'&&(m.a==null||m.b==null)).length;
+  const stageTitle=T.scheme==='groups'?(T.matches.some(m=>m.ph==='ko')?'Плей-офф':'Групповой этап'):T.scheme==='ko'?(onTables[0]?ttPhaseName(T,onTables[0]):'Сетка'):T.scheme==='rotate'?'Американо':'Круговой турнир';
+  const side=(m,s)=>{const L=m.live;return `<div class="team"><div class="names"><span class="n">${esc(ttSideName(T,m,s))}</span></div>${L?`<span class="final">${(L.games.filter(g=>s==='a'?g[0]>g[1]:g[1]>g[0]).length)}<small style="font-size:16px;color:var(--mute)"> · ${L.cur[s==='a'?0:1]}</small></span>`:''}</div>`};
+  app.innerHTML=`${ttHeader(T,`<h1 class="big" style="margin-top:14px">${stageTitle}</h1>`)}
+  <div class="stack" style="margin-top:14px">
+    ${onTables.map(m=>`<article class="card court" id="tm-${m.id}">
+      <div class="court-head"><span class="court-tag tt">СТОЛ ${m.table}</span><span class="hint" style="margin:0">${ttPhaseName(T,m)} · до ${ttNeed(T,m)} ${plural(ttNeed(T,m),'победы','побед','побед')}</span></div>
+      ${side(m,'a')}<div class="vs">VS</div>${side(m,'b')}
+      <div class="court-foot"><div class="btnrow">
+        <button class="finish" data-a="tt-score" data-m="${m.id}">Ввести счёт</button>
+        <button class="finish alt" data-a="tt-live" data-m="${m.id}">${m.live?'Продолжить счёт':'Счёт по ходу'}</button>
+        <button class="iconbtn sm" data-a="tt-mmenu" data-m="${m.id}" aria-label="Ещё">${IC.dots}</button></div></div>
+    </article>`).join('')||`<div class="rest">Свободных столов нет — ждём окончания текущих матчей</div>`}
+    ${nextUp.length?`<section class="card"><div class="label">Дальше</div>${nextUp.slice(0,8).map(m=>`<div class="mline"><span>${esc(ttSideName(T,m,'a'))}</span><span class="sc pending">${ttPhaseName(T,m).replace('Группа ','').replace(' · тур ',' ·')}</span><span class="r">${esc(ttSideName(T,m,'b'))}</span></div>`).join('')}
+      ${nextUp.length>8?`<div class="hint">И ещё ${nextUp.length-8}</div>`:''}<div class="hint">Матч выходит на стол, когда он освобождается и оба соперника свободны.</div></section>`:''}
+    ${waiting?`<div class="rest">${waiting} ${plural(waiting,'матч ждёт','матча ждут','матчей ждут')} соперников из прошлых кругов</div>`:''}
+  </div>`;
+}
+/* ---------- score entry: game by game ---------- */
+function ttScoreSheet(T,m,prefill){
+  const need=ttNeed(T,m),rows=2*need-1,g=prefill||m.games||[];
+  const nA=esc(ttSideName(T,m,'a')),nB=esc(ttSideName(T,m,'b'));
+  $('#sheet').innerHTML=`<div class="sheet-bg" data-a="closesheet"><div class="sheet" role="dialog" aria-label="Счёт матча">
+    <div class="grab"></div><h3>Счёт матча</h3><p>${ttPhaseName(T,m)} · до ${need} ${plural(need,'победы','побед','побед')}, партия до ${T.cfg.pts}</p>
+    <div class="gamegrid"><span></span><b title="${nA}">${nA}</b><b title="${nB}">${nB}</b>
+    ${[...Array(rows)].map((_,i)=>`<span class="gno">${i+1}</span>
+      <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" class="gin" data-g="${i}" data-s="0" value="${g[i]?g[i][0]:''}" aria-label="Партия ${i+1}, ${nA}">
+      <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" class="gin" data-g="${i}" data-s="1" value="${g[i]?g[i][1]:''}" aria-label="Партия ${i+1}, ${nB}">`).join('')}
+    </div>
+    <div class="matchsum" id="msum"></div>
+    <div class="err" id="serr"></div>
+    <button class="act primary" data-a="tt-save" data-m="${m.id}">Сохранить результат</button>
+    <button class="act" data-a="closesheet" style="background:none;color:var(--mute)">Отмена</button></div></div>`;
+  $('.sheet').addEventListener('click',e=>{if(!e.target.closest('[data-a="closesheet"]'))e.stopPropagation()});
+  $('.sheet [data-a="tt-save"]').addEventListener('click',()=>{const T2=cur(),m2=T2&&T2.matches.find(x=>x.id===m.id);if(m2&&m2.st!=='done')ttSaveScore(T2,m2)});
+  const upd=()=>{const games=ttReadGames(),r=games.err?null:ttMatchCheck(games.list,need,T.cfg.pts);
+    let wa=0,wb=0;(games.list||[]).forEach(x=>{if(+x[0]>+x[1])wa++;else if(+x[1]>+x[0])wb++});
+    $('#msum').innerHTML=`Партии <b>${wa}:${wb}</b>${r&&r.win?` · победа: <b>${r.win==='a'?nA:nB}</b>`:''}`;$('#serr').textContent='';
+    document.querySelectorAll('.gin').forEach(el=>{const i=+el.dataset.g,row=[...document.querySelectorAll(`.gin[data-g="${i}"]`)].map(x=>x.value);
+      el.classList.toggle('bad',row[0]!==''&&row[1]!==''&&!!ttGameErr(row[0],row[1],T.cfg.pts))})};
+  document.querySelectorAll('.gin').forEach(el=>el.addEventListener('input',upd));upd();
+  const first=document.querySelector('.gin');if(first&&!g.length)first.focus();
+}
+function ttReadGames(){
+  const rows={};document.querySelectorAll('.gin').forEach(el=>{(rows[el.dataset.g]=rows[el.dataset.g]||[])[+el.dataset.s]=el.value.trim()});
+  const list=[];let gap=false;
+  for(const k of Object.keys(rows).sort((a,b)=>a-b)){const [x,y]=rows[k];
+    if(x===''&&y===''){gap=true;continue}
+    if(gap)return {err:`Пропущена партия перед партией ${+k+1}`,list};
+    if(x===''||y==='')return {err:`Партия ${+k+1}: введите счёт обоих`,list};
+    list.push([+x,+y])}
+  return {list};
+}
+function ttSaveScore(T,m){
+  const need=ttNeed(T,m),r=ttReadGames();
+  if(r.err){$('#serr').textContent=r.err;return}
+  const c=ttMatchCheck(r.list,need,T.cfg.pts);
+  if(c.err){$('#serr').textContent=c.err;return}
+  closeSheet();ttSetResult(T,m,r.list,c.win,null);buzz();touch(T);
+  if(T.stage==='results'){store.ui.tab='play';render();scrollTo(0,0);return}
+  render();toast(`Сохранено: ${c.wa}:${c.wb}`);
+}
+/* ---------- live scoring with serve hints ---------- */
+function renderTTLive(app,T,m){
+  const L=m.live,need=ttNeed(T,m),dbl=T.unit!=='single';
+  const wa=L.games.filter(g=>g[0]>g[1]).length,wb=L.games.length-wa;
+  const started=L.first!=null&&(!dbl||L.dbl);
+  if(!started){
+    const pa=ttSide(T,m,'a'),pb=ttSide(T,m,'b');
+    app.innerHTML=`<div class="topbar"><button class="iconbtn" data-a="tt-livex" aria-label="Свернуть">${IC.home}</button><div style="flex:1"></div></div>
+    <div class="eyebrow tt" style="margin-top:14px">${ttPhaseName(T,m)}</div><h1 class="big">Кто подаёт первым?</h1>
+    <p class="sub">${dbl&&L.first!=null?'Теперь выберите, кто принимает первым':'По правилам — жребий. Нажмите на имя или бросьте жребий.'}</p>
+    <div class="stack" style="margin-top:14px">
+    ${!dbl?['a','b'].map(s=>`<button class="sportcard" data-a="tt-first" data-v="${s}"><span style="min-width:0"><b>${esc(ttSideName(T,m,s))}</b></span><span class="chev">›</span></button>`).join('')+`<button class="ghost" data-a="tt-lot">Жребий</button>`
+     :L.first==null?pa.concat(pb).map(p=>`<button class="sportcard" data-a="tt-dserver" data-v="${p}"><span style="min-width:0"><b>${esc(T.players[p])}</b><span>${pa.includes(p)?esc(ttSideName(T,m,'a')):esc(ttSideName(T,m,'b'))}</span></span><span class="chev">›</span></button>`).join('')+`<button class="ghost" data-a="tt-lot">Жребий</button>`
+     :(L.first==='a'?pb:pa).map(p=>`<button class="sportcard" data-a="tt-dreceiver" data-v="${p}"><span style="min-width:0"><b>${esc(T.players[p])}</b><span>принимает подачу ${esc(T.players[L.pendingS])}</span></span><span class="chev">›</span></button>`).join('')}
+    </div>`;return;
+  }
+  const si=ttServeInfo(T,m,L),srvSide=dbl?si.serverSide:si.server;
+  const half=s=>{const pts=L.cur[s==='a'?0:1],gw=s==='a'?wa:wb,serving=srvSide===s;
+    return `<button class="livehalf ${serving?'serving':''}" data-a="tt-pt" data-v="${s}" aria-label="Очко: ${esc(ttSideName(T,m,s))}">
+      <span class="lname">${esc(ttSideName(T,m,s))}</span>
+      <span class="lpts">${pts}</span>
+      <span class="lgames">Партии: <b>${gw}</b></span>
+      ${serving?`<span class="lserve"><i class="ballico tt"></i>${dbl?`подаёт ${esc(T.players[si.server])} → ${esc(T.players[si.receiver])}`:'подача'}</span>`:''}
+    </button>`};
+  app.innerHTML=`<div class="topbar"><button class="iconbtn" data-a="tt-livex" aria-label="Свернуть">${IC.home}</button>
+    <div style="flex:1;text-align:center;padding-top:4px"><div class="eyebrow tt">${ttPhaseName(T,m)}</div><div class="sub" style="font-size:13px">Партия ${L.games.length+1} · до ${need} ${plural(need,'победы','побед','побед')}${si.deciding?' · решающая':''}</div></div>
+    <button class="iconbtn" data-a="tt-undo" aria-label="Отменить очко">↶</button></div>
+    <div class="livewrap">${half('a')}${half('b')}</div>
+    ${L.games.length?`<div class="rest" style="justify-content:center;margin-top:10px">Партии: ${L.games.map(g=>g.join(':')).join(' · ')}</div>`:''}
+    <div class="rest" style="justify-content:center;margin-top:6px">Нажимайте на сторону, которая выиграла очко</div>`;
+}
+function ttLiveTap(T,m,side){
+  const ev=ttLivePoint(T,m,m.live,side);buzz();touch(T);
+  if(ev.includes('ends'))toast('Смена сторон');
+  if(ev.includes('match')){
+    render();const L=m.live,wa=L.games.filter(g=>g[0]>g[1]).length,wb=L.games.length-wa;
+    return sheet('Матч окончен',`${esc(ttSideName(T,m,'a'))} — ${esc(ttSideName(T,m,'b'))}: <b>${wa}:${wb}</b> (${L.games.map(g=>g.join(':')).join(', ')})`,[
+      {label:'Сохранить результат',kind:'primary',run:()=>{const c=ttMatchCheck(L.games,ttNeed(T,m),T.cfg.pts);if(c.err){toast(c.err);return}store.ui.live=null;ttSetResult(T,m,L.games,c.win,null);touch(T);render();scrollTo(0,0);toast('Результат сохранён')}},
+      {label:'Отменить последнее очко',run:()=>{ttLiveUndo(m.live);touch(T);render()}}]);
+  }
+  if(ev.includes('game')){const g=m.live.games[m.live.games.length-1];toast(`Партия ${g[0]}:${g[1]} · смена сторон`)}
+  render();
+}
+/* ---------- tables, bracket, results ---------- */
+function ttStandRows(T,R,ids,adv){
+  return ids.map((e,i)=>{const s=R.stats[e];return `<div class="lb-row">
+    <span class="place ${i<3&&s.g?'p'+(i+1):''}">${s.g?i+1:'—'}</span>
+    <div style="min-width:0"><div class="lb-name">${esc(T.entrants[e].name)}${T.entrants[e].out?' <small style="color:var(--coral)">снят</small>':''}${adv&&i<adv?' <small class="qual">выход</small>':''}${R.lot&&R.lot[e]?' <small style="color:var(--mute)">жребий</small>':''}</div>
+      <div class="lb-meta">${s.g} ${plural(s.g,'матч','матча','матчей')} · ${s.w}–${s.l} · партии ${s.gw}:${s.gl} · очки ${s.pw}:${s.pl}</div></div>
+    <span class="delta zero" title="Очки за матчи">${s.mp}</span></div>`}).join('');
+}
+function renderTTTable(app,T){
+  let body='';
+  const note=`<div class="hint" style="margin-top:12px">Очки: 2 за победу, 1 за поражение, 0 за неявку. При равенстве — личные встречи, затем партии и очки между равными (ITTF).</div>`;
+  if(T.scheme==='rotate'){const R=ttRankPlayers(T);body=`<section class="card"><div class="row" style="margin-bottom:4px"><div class="label" style="margin:0">Игрок</div><div class="label" style="margin:0">Очки</div></div>${ttStandRows(T,R,R.order)}<div class="hint" style="margin-top:12px">Очки: 2 за победу, 1 за поражение. При равенстве — соотношение партий, затем очков.</div></section>`}
+  else if(T.scheme==='rr'){const R=ttRank(T,T.entrants.map((x,i)=>i),T.matches);body=`<section class="card"><div class="row" style="margin-bottom:4px"><div class="label" style="margin:0">${T.unit==='pair'?'Пара':'Игрок'}</div><div class="label" style="margin:0">Очки</div></div>${ttStandRows(T,R,R.order)}${note}</section>`}
+  else if(T.scheme==='groups'){body=T.groups.map((list,gi)=>{const R=ttRank(T,list,T.matches.filter(m=>m.ph==='g'&&m.g===gi));
+      return `<section class="card"><div class="row" style="margin-bottom:4px"><div class="label" style="margin:0">Группа ${GRP(gi)}</div><div class="label" style="margin:0">Очки</div></div>${ttStandRows(T,R,R.order,T.cfg.advance)}</section>`}).join('')+`<div class="rest">${note.replace(/<[^>]+>/g,'')}</div>`}
+  else{const rows=ttFinal(T);body=`<section class="card"><div class="label">Места по итогам сетки</div>${rows.map(r=>`<div class="lb-row"><span class="place ${r.p1<=3&&T.stage==='results'?'p'+r.p1:''} ${r.tie?'tie':''}">${r.place}</span><div style="min-width:0"><div class="lb-name">${esc(r.name)}</div><div class="lb-meta">${r.st.w}–${r.st.l} · партии ${r.st.gw}:${r.st.gl}</div></div><span></span></div>`).join('')}<div class="hint" style="margin-top:12px">Места окончательные после финала.</div></section>`}
+  app.innerHTML=`${ttHeader(T,'<h1 class="big" style="margin-top:14px">Таблица</h1>')}<div class="stack" style="margin-top:14px">${body}</div>`;
+}
+function ttMatchLine(T,m){
+  const sc=m.bye?'—':m.wo?(m.wo==='ab'?'н/я':'н/я'):m.st==='done'?m.games.map(g=>g.join(':')).join(' '):m.table?`Стол ${m.table}`:'';
+  const summary=m.st==='done'&&!m.bye&&!m.wo?(()=>{const wa=m.games.filter(g=>g[0]>g[1]).length;return `${wa}:${m.games.length-wa}`})():m.wo?'w/o':m.bye?'пропуск':'';
+  const nameA=`<span class="${m.win==='a'?'wn':''}">${esc(ttSideName(T,m,'a'))}</span>`,nameB=`<span class="r ${m.win==='b'?'wn':''}">${esc(ttSideName(T,m,'b'))}</span>`;
+  const inner=`${nameA}<span class="sc ${m.st==='done'?'':'pending'}" title="${esc(sc)}">${summary||sc||'·'}</span>${nameB}`;
+  return m.st==='done'&&!m.bye?`<button class="mline" data-a="tt-fix" data-m="${m.id}">${inner}</button>`:`<div class="mline">${inner}</div>`;
+}
+function renderTTGrid(app,T){
+  const sec=(title,ms)=>ms.length?`<section class="card"><div class="round-title"><b>${title}</b></div>${ms.map(m=>ttMatchLine(T,m)).join('')}</section>`:'';
+  let body='';
+  const byRound=(ph,g)=>{const ms=T.matches.filter(m=>m.ph===ph&&(g==null||m.g===g));const rs=[...new Set(ms.map(m=>m.r))].sort((a,b)=>a-b);return rs.map(r=>({r,ms:ms.filter(m=>m.r===r)}))};
+  if(T.scheme==='groups')T.groups.forEach((l,gi)=>{body+=sec(`Группа ${GRP(gi)}`,T.matches.filter(m=>m.ph==='g'&&m.g===gi))});
+  if(T.scheme==='rr')byRound('rr').forEach(x=>body+=sec(`Тур ${x.r+1}`,x.ms));
+  if(T.scheme==='rotate')byRound('am').forEach(x=>body+=sec(`Раунд ${x.r+1}`,x.ms));
+  ['ko','cons'].forEach(ph=>byRound(ph).forEach(x=>body+=sec(ttPhaseName(T,x.ms[0]),x.ms.filter(m=>!(m.bye&&m.a==null&&m.b==null)))));
+  const th=T.matches.filter(m=>m.ph==='third');body+=sec('Матч за 3-е место',th);
+  if(T.scheme==='groups'&&!T.matches.some(m=>m.ph==='ko'))body+=`<div class="rest">Сетка плей-офф появится, когда закончатся все матчи групп</div>`;
+  app.innerHTML=`${ttHeader(T,'<h1 class="big" style="margin-top:14px">Сетка</h1>')}<div class="stack" style="margin-top:14px"><div class="rest">Нажмите на сыгранный матч, чтобы исправить счёт</div>${body}</div>`;
+}
+function ttPodium(rows){
+  const firstOf=p=>rows.find(r=>r.p1===p);const top=[firstOf(1),firstOf(2),firstOf(3)];
+  const h=[150,110,84],bg=['var(--gold)','var(--silver)','var(--bronze)'];
+  return `<div class="podium">${[1,0,2].filter(i=>top[i]).map(i=>{const r=top[i],shared=rows.filter(x=>x.p1===r.p1);return `<div class="pod"><span class="nm">${shared.map(x=>esc(x.name)).join('<br>')}</span>
+    <div class="blk" style="height:${h[i]}px;background:${bg[i]}"><span>${r.place}</span><small>${r.st.w}–${r.st.l}</small></div></div>`}).join('')}</div>`;
+}
+function renderTTResults(app,T){
+  const rows=ttFinal(T),champ=rows.filter(r=>r.p1===1),p=ttProgress(T);
+  app.innerHTML=`${ttHeader(T,'')}
+  <div class="eyebrow tt" style="margin-top:14px">${p.done<p.all?'Турнир остановлен досрочно':'Все матчи сыграны'}</div>
+  <div class="sub" style="margin-top:8px">${T.unit!=='pair'&&champ.length===1?'Чемпион':'Чемпионы'}</div>
+  <div class="champ tt">${champ.map(r=>esc(r.name)).join(', ')}</div>
+  <section class="card pop" style="margin-top:18px;padding-bottom:0;overflow:hidden">${ttPodium(rows)}</section>
+  <div class="stack" style="margin-top:14px">
+    <section class="card"><div class="label">Итоговые места</div>${rows.map(r=>`<div class="lb-row"><span class="place ${r.p1<=3?'p'+r.p1:''} ${r.tie?'tie':''}">${r.place}</span><div style="min-width:0"><div class="lb-name">${esc(r.name)}</div><div class="lb-meta">${r.st.w} ${plural(r.st.w,'победа','победы','побед')} · ${r.st.l} ${plural(r.st.l,'поражение','поражения','поражений')} · партии ${r.st.gw}:${r.st.gl}</div></div><span></span></div>`).join('')}</section>
+    <button class="cta tt" data-a="finishT">${IC.check} Завершить турнир</button>
+    <button class="ghost" data-a="share">Поделиться результатом</button>
+    <div class="rest" style="justify-content:center">Турнир сохранится в завершённых. Ошибку в счёте можно исправить во вкладке «Сетка».</div>
+  </div>`;
+  if(!T.celebrated){T.celebrated=true;touch(T);confetti()}
+}
+function renderTTArchived(app,T){
+  const rows=ttFinal(T),champ=rows.filter(r=>r.p1===1);
+  const byPh=[...new Set(T.matches.map(m=>m.ph))];
+  app.innerHTML=`<div class="topbar"><button class="iconbtn" data-a="home" aria-label="На главную">${IC.home}</button>
+    <div style="flex:1"></div><button class="iconbtn" data-a="amenu" aria-label="Действия">${IC.dots}</button></div>
+  <div class="eyebrow tt" style="margin-top:14px">Настольный теннис · ${TT_SCHEME[T.scheme]} · ${dateRu(T.finishedAt||T.createdAt)}</div>
+  <h1 class="big">${esc(T.name)}</h1>
+  <div class="sub">${T.unit!=='pair'&&champ.length===1?'Чемпион':'Чемпионы'}: <b style="color:var(--tt)">${champ.map(r=>esc(r.name)).join(', ')}</b></div>
+  <section class="card" style="margin-top:18px;padding-bottom:0;overflow:hidden">${ttPodium(rows)}</section>
+  <div class="stack" style="margin-top:14px">
+    <section class="card"><div class="label">Итоговые места</div>${rows.map(r=>`<div class="lb-row"><span class="place ${r.p1<=3?'p'+r.p1:''} ${r.tie?'tie':''}">${r.place}</span><div style="min-width:0"><div class="lb-name">${esc(r.name)}</div><div class="lb-meta">${r.st.w}–${r.st.l} · партии ${r.st.gw}:${r.st.gl}</div></div><span></span></div>`).join('')}</section>
+    <section class="card"><div class="label">Все матчи</div>${T.matches.filter(m=>!m.bye).map(m=>{const line=ttMatchLine(T,m).replace('<button class="mline" data-a="tt-fix"','<div class="mline" data-x').replace(/<\/button>$/,'</div>');return `<div class="hint" style="margin:8px 0 0">${ttPhaseName(T,m)}</div>${line}`}).join('')}</section>
+    <button class="cta tt" data-a="share">Поделиться результатом</button>
+  </div>`;
+}
+function ttCardData(T){
+  const rows=ttFinal(T),champ=rows.filter(r=>r.p1===1);
+  return {sport:'НАСТОЛЬНЫЙ ТЕННИС',meta:`${TT_SCHEME[T.scheme]} · ${dateRu(T.finishedAt||T.createdAt)} · до ${T.cfg.pts}`,
+    champLabel:T.unit!=='pair'&&champ.length===1?'ЧЕМПИОН':'ЧЕМПИОНЫ',champ:champ.map(r=>r.name).join(', '),champSub:`${champ[0].st.w} ${plural(champ[0].st.w,'победа','победы','побед')} · партии ${champ[0].st.gw}:${champ[0].st.gl}`,
+    head:[T.unit==='pair'?'ПАРА':'ИГРОК','В–П'],
+    rows:rows.map(r=>({name:r.name,place:r.place,p1:r.p1,tie:r.tie,mid:`партии ${r.st.gw}:${r.st.gl}`,pill:`${r.st.w}–${r.st.l}`,kind:'zero',sub:`${r.st.w}–${r.st.l}`})),
+    foot:'Места — по итогам турнира (правила ITTF)'};
+}
+function ttCopyText(T){const rows=ttFinal(T);return `${T.name} (Настольный теннис, ${TT_SCHEME[T.scheme]}, ${dateRu(T.finishedAt||T.createdAt)})\n`+rows.map(r=>`${r.place}. ${r.name} — ${r.st.w}–${r.st.l}, партии ${r.st.gw}:${r.st.gl}`).join('\n')}
+
+/* ================= table tennis: actions ================= */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
+  if(a==='pick'){if(b.dataset.v==='tt'){store.ttdraft=store.ttdraft||freshTTDraft();return go('ttsetup',null)}return go('setup',null)}
+  if(!a.startsWith('tt-'))return;
+  const d=store.ttdraft,T=cur(),M=T&&T.matches?T.matches.find(x=>x.id===+b.dataset.m):null;
+  const redraw=()=>{saveLocal();render()};
+  switch(a){
+    case 'tt-unit':d.unit=b.dataset.v;d.rounds=null;buzz();return redraw();
+    case 'tt-scheme':{const n=ttEntrantCount(d);if(n<TT_MIN[b.dataset.v]){$('#e-cfg').textContent=`Для формата «${TT_SCHEME[b.dataset.v]}» нужно минимум ${TT_MIN[b.dataset.v]} ${d.unit==='pair'?'пар':'игроков'}`;return}d.scheme=b.dataset.v;return redraw()}
+    case 'tt-cycles':{const P=ttPlan(d);d.cycles=Math.min(3,Math.max(1,(P.cycles||1)+ +b.dataset.d));buzz();return redraw()}
+    case 'tt-groups':d.groupCount=+b.dataset.v;return redraw();
+    case 'tt-adv':d.advance=+b.dataset.v;return redraw();
+    case 'tt-third':d.third=!d.third;return redraw();
+    case 'tt-cons':d.consolation=!d.consolation;return redraw();
+    case 'tt-seed':d.seeding=b.dataset.v;return redraw();
+    case 'tt-pts':d.pts=+b.dataset.v;return redraw();
+    case 'tt-rwins':d.rwins=Math.min(4,Math.max(1,d.rwins+ +b.dataset.d));buzz();return redraw();
+    case 'tt-tables':d.tables=Math.min(ttMaxTables(d),Math.max(1,ttTables(d)+ +b.dataset.d));d.rounds=null;buzz();return redraw();
+    case 'tt-rounds':{const P=ttPlan(d);if(!P.ok||!P.step)return;d.rounds=Math.max(P.step,Math.min(Math.floor(60/P.step)*P.step,P.rounds+ +b.dataset.d*P.step));buzz();return redraw()}
+    case 'tt-start':return ttStartFromDraft();
+    case 'tt-score':if(M&&M.st!=='done')ttScoreSheet(T,M);return;
+    case 'tt-live':if(!M||M.st==='done')return;M.live=M.live||{games:[],cur:[0,0],first:null,dbl:null,hist:[]};store.ui.live=M.id;touch(T);render();return scrollTo(0,0);
+    case 'tt-livex':store.ui.live=null;saveLocal();return render();
+    case 'tt-first':{const m=T.matches.find(x=>x.id===store.ui.live);m.live.first=b.dataset.v;touch(T);return render()}
+    case 'tt-lot':{const m=T.matches.find(x=>x.id===store.ui.live),side=Math.random()<.5?'a':'b';
+      if(T.unit==='single'){m.live.first=side;toast(`Жребий: подаёт ${ttSideName(T,m,side)}`)}
+      else{const ps=ttSide(T,m,side);m.live.pendingS=ps[Math.floor(Math.random()*2)];m.live.first=side;toast(`Жребий: подаёт ${T.players[m.live.pendingS]}`)}
+      touch(T);return render()}
+    case 'tt-dserver':{const m=T.matches.find(x=>x.id===store.ui.live),p=+b.dataset.v;m.live.pendingS=p;m.live.first=ttSide(T,m,'a').includes(p)?'a':'b';touch(T);return render()}
+    case 'tt-dreceiver':{const m=T.matches.find(x=>x.id===store.ui.live);m.live.dbl={s:m.live.pendingS,r:+b.dataset.v};touch(T);return render()}
+    case 'tt-pt':{const m=T.matches.find(x=>x.id===store.ui.live);if(m&&m.st!=='done')ttLiveTap(T,m,b.dataset.v);return}
+    case 'tt-undo':{const m=T.matches.find(x=>x.id===store.ui.live);if(!m)return;if(!ttLiveUndo(m.live)){if(m.live.games.length===0&&m.live.cur[0]+m.live.cur[1]===0){m.live.first=null;m.live.dbl=null}else toast('Нечего отменять')}touch(T);return render()}
+    case 'tt-mmenu':{if(!M)return;const acts=[];
+      if(T.unit!=='rotate')['a','b'].forEach(s=>acts.push({label:`Не пришёл: ${esc(ttSideName(T,M,s))}`,run:()=>sheet('Техническое поражение?',`${esc(ttSideName(T,M,s))} получит поражение без игры (0 очков), соперник — победу.`,[{label:'Засчитать',kind:'danger',run:()=>{ttSetResult(T,M,[],s==='a'?'b':'a',s);touch(T);render()}}])}));
+      else ['a','b'].forEach(s=>acts.push({label:`Не явилась пара: ${esc(ttSideName(T,M,s))}`,run:()=>sheet('Техническое поражение?','Пара получит поражение без игры (0 очков).',[{label:'Засчитать',kind:'danger',run:()=>{ttSetResult(T,M,[],s==='a'?'b':'a',s);touch(T);render()}}])}));
+      if(M.live)acts.push({label:'Сбросить счёт по ходу',run:()=>{M.live=null;touch(T);render()}});
+      return sheet(ttPhaseName(T,M),`${esc(ttSideName(T,M,'a'))} — ${esc(ttSideName(T,M,'b'))}`,acts)}
+    case 'tt-fix':{if(!M)return;const c=ttCanEdit(T,M);if(!c.ok)return sheet('Нельзя исправить',c.why,[]);
+      return sheet('Исправить счёт?',`Сейчас: ${M.wo?'техническое поражение':M.games.map(g=>g.join(':')).join(', ')}.${M.ph==='g'&&T.matches.some(x=>x.ph==='ko')?' Сетка плей-офф будет составлена заново после исправления.':''}`,
+        [{label:'Исправить',kind:'primary',run:()=>{const old=M.wo?[]:M.games.slice();ttReopen(T,M);touch(T);store.ui.tab='play';render();ttScoreSheet(T,M,old)}}])}
+    case 'tt-menu':{const acts=[{label:'Переименовать',run:()=>renameSheet(T)}];
+      if(T.unit!=='rotate'&&T.stage==='play'){const alive=T.entrants.map((x,i)=>i).filter(i=>!T.entrants[i].out);
+        acts.push({label:T.unit==='pair'?'Снять пару с турнира':'Снять игрока с турнира',run:()=>sheet(T.unit==='pair'?'Кого снять?':'Кого снять?','Все его оставшиеся матчи засчитаются как техническое поражение.',alive.map(i=>({label:esc(T.entrants[i].name),run:()=>sheet('Снять с турнира?',`${esc(T.entrants[i].name)} — оставшиеся матчи будут засчитаны соперникам. Отменить нельзя.`,[{label:'Снять',kind:'danger',run:()=>{ttWithdraw(T,i);touch(T);render();toast('Снят с турнира')}}])})))})}
+      if(T.stage==='play'&&(T.scheme==='rr'||T.scheme==='rotate'))acts.push({label:'Остановить и подвести итоги',kind:'primary',run:()=>sheet('Остановить турнир?','Несыгранные матчи не войдут в зачёт.',[{label:'Подвести итоги',kind:'primary',run:()=>{T.matches.forEach(m=>{if(m.st!=='done'){m.st='done';m.bye=true;m.cancelled=true;m.win=null;m.table=null;m.live=null}});T.stage='results';touch(T);store.ui.tab='play';render();scrollTo(0,0)}}])});
+      acts.push({label:'Удалить турнир',kind:'danger',run:()=>sheet('Удалить турнир?','Все результаты этого турнира будут удалены.',[{label:'Удалить',kind:'danger',run:()=>deleteT(T)}])});
+      const p=ttProgress(T);return sheet(T.name,`Настольный теннис · ${TT_SCHEME[T.scheme]} · сыграно ${p.done} из ${p.all}<br>${syncChip().replace('id="sync"','')}`,acts)}
+    default:{if(a.startsWith('tt-wins-')){const k=a.slice(8);d.wins[k]=Math.min(4,Math.max(1,d.wins[k]+ +b.dataset.d));buzz();return redraw()}}
+  }
+});
 
 /* ================= sheet / toast ================= */
 function sheet(title,text,actions,body){
@@ -939,8 +1710,7 @@ function reopenMatch(T,ri,k){
   setTimeout(()=>{const el=$('#court-'+k);el&&el.scrollIntoView({behavior:'smooth',block:'center'})},50);
 }
 function copyResults(T){
-  const {st}=standings(T);
-  const txt=`${T.name} (${FMT[T.format]}, ${dateRu(T.finishedAt||T.createdAt)})\n`+st.map(s=>`${s.place}. ${s.name} — Δ ${fmtD(s.d)} (${s.f}:${s.a}, игр ${s.g})`).join('\n');
+  const txt=T.sport==='tt'?ttCopyText(T):(()=>{const {st}=standings(T);return `${T.name} (${FMT[T.format]}, ${dateRu(T.finishedAt||T.createdAt)})\n`+st.map(s=>`${s.place}. ${s.name} — Δ ${fmtD(s.d)} (${s.f}:${s.a}, игр ${s.g})`).join('\n')})();
   const manual=()=>{sheet('Итоги турнира','Выделите текст и скопируйте его.',[],`<textarea id="copy-area" readonly style="width:100%;height:220px;border-radius:14px;border:2px solid var(--mist);padding:10px;font:600 14px/1.4 var(--f-body);color:var(--ink);background:var(--paper)">${esc(txt)}</textarea>`);const ta=$('#copy-area');if(ta){ta.focus();ta.select()}};
   if(TG){
     try{TG.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(txt));return}catch(e){}
@@ -954,13 +1724,13 @@ function renameSheet(T){
 }
 
 document.addEventListener('click',e=>{
-  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,d=store.draft,T=cur();
+  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,d=curDraft(),T=cur();
   switch(a){
     case 'home':return go('home',null);
-    case 'new':return go('setup',null);
+    case 'new':return go('sport',null);
     case 'open':{const t=store.tournaments[b.dataset.id];return go(t.status==='finished'?'view':'play',t.id,'play')}
     case 'fmt':d.format=b.dataset.v;d.rounds=null;saveLocal();return render();
-    case 'rm':d.players.splice(+b.dataset.i,1);d.sample=false;saveLocal();return render();
+    case 'rm':d.players.splice(+b.dataset.i,1);d.sample=false;d.rounds=null;saveLocal();return render();
     case 'rmpair':d.players.splice(+b.dataset.i,2);d.sample=false;saveLocal();return render();
     case 'shufflepairs':d.players=shuffle(d.players);d.sample=false;buzz();saveLocal();return render();
     case 'clear':d.players=[];d.sample=false;saveLocal();render();return $('#newname').focus();
@@ -1024,7 +1794,7 @@ function confetti(){
 
 function start(data){
   store=(data&&data.store)||loadLocal()||freshStore();
-  store.tournaments=store.tournaments||{};store.draft=store.draft||freshDraft();store.ui=store.ui||{screen:'home',id:null,tab:'play'};store.unsynced=store.unsynced||[];
+  store.tournaments=store.tournaments||{};store.draft=store.draft||freshDraft();store.ttdraft=store.ttdraft||freshTTDraft();store.ui=store.ui||{screen:'home',id:null,tab:'play'};store.unsynced=store.unsynced||[];
   migrateOld();
   store.unsynced.forEach(id=>pend.add(id));
   if(TG)tgSetup();
