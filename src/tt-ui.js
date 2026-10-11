@@ -140,6 +140,7 @@ function renderTTTabbar(T){
   </nav></div>`;
 }
 function renderTT(app,T){
+  if(store.ui.score!=null){const m=T.matches.find(x=>x.id===store.ui.score);if(m&&m.st!=='done')return renderTTScore(app,T,m);store.ui.score=null}
   if(store.ui.live!=null){const m=T.matches.find(x=>x.id===store.ui.live);if(m&&m.st!=='done'){$('#tabbar').innerHTML='';return renderTTLive(app,T,m)}store.ui.live=null}
   renderTTTabbar(T);
   const t=store.ui.tab;
@@ -167,30 +168,44 @@ function renderTT(app,T){
     ${waiting?`<div class="rest">${waiting} ${plural(waiting,'матч ждёт','матча ждут','матчей ждут')} соперников из прошлых кругов</div>`:''}
   </div>`;
 }
-/* ---------- score entry: game by game ---------- */
-function ttScoreSheet(T,m,prefill){
-  const need=ttNeed(T,m),rows=2*need-1,g=prefill||m.games||[];
+/* ---------- score entry: its own screen (a pop-up sheet gets closed by the phone keyboard) ---------- */
+function ttOpenScore(T,m,prefill){
+  const g=prefill||(m.live&&m.live.games.length?m.live.games:null)||m.games||[];
+  store.ui.score=m.id;store.ui.scoreVals=g.map(x=>[String(x[0]),String(x[1])]);store.ui.live=null;
+  saveLocal();render();scrollTo(0,0);
+  const first=document.querySelector('.gin');if(first&&!g.length)setTimeout(()=>first.focus(),50);
+}
+function renderTTScore(app,T,m){
+  const need=ttNeed(T,m),rows=2*need-1,vals=store.ui.scoreVals||[];
   const nA=esc(ttSideName(T,m,'a')),nB=esc(ttSideName(T,m,'b'));
-  $('#sheet').innerHTML=`<div class="sheet-bg" data-a="closesheet"><div class="sheet" role="dialog" aria-label="Счёт матча">
-    <div class="grab"></div><h3>Счёт матча</h3><p>${ttPhaseName(T,m)} · до ${need} ${plural(need,'победы','побед','побед')}, партия до ${T.cfg.pts}</p>
-    <div class="gamegrid"><span></span><b title="${nA}">${nA}</b><b title="${nB}">${nB}</b>
+  $('#tabbar').innerHTML='';
+  app.innerHTML=`<div class="topbar"><button class="iconbtn" data-a="tt-scorex" aria-label="Назад">${IC.home}</button><div style="flex:1"></div></div>
+  <div class="eyebrow tt" style="margin-top:14px">${ttPhaseName(T,m)}${m.table?' · стол '+m.table:''}</div>
+  <h1 class="big">Счёт матча</h1>
+  <p class="sub" style="margin:0 0 14px">До ${need} ${plural(need,'победы','побед','побед')} в партиях · партия до ${T.cfg.pts}, отрыв 2</p>
+  <section class="card">
+    <div class="gamegrid"><span></span><b>${nA}</b><b>${nB}</b>
     ${[...Array(rows)].map((_,i)=>`<span class="gno">${i+1}</span>
-      <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" class="gin" data-g="${i}" data-s="0" value="${g[i]?g[i][0]:''}" aria-label="Партия ${i+1}, ${nA}">
-      <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" class="gin" data-g="${i}" data-s="1" value="${g[i]?g[i][1]:''}" aria-label="Партия ${i+1}, ${nB}">`).join('')}
+      <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" class="gin" id="gin-${i}-0" data-g="${i}" data-s="0" value="${esc((vals[i]||[])[0]||'')}" aria-label="Партия ${i+1}, ${nA}" enterkeyhint="next">
+      <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" class="gin" id="gin-${i}-1" data-g="${i}" data-s="1" value="${esc((vals[i]||[])[1]||'')}" aria-label="Партия ${i+1}, ${nB}" enterkeyhint="next">`).join('')}
     </div>
     <div class="matchsum" id="msum"></div>
     <div class="err" id="serr"></div>
-    <button class="act primary" data-a="tt-save" data-m="${m.id}">Сохранить результат</button>
-    <button class="act" data-a="closesheet" style="background:none;color:var(--mute)">Отмена</button></div></div>`;
-  $('.sheet').addEventListener('click',e=>{if(!e.target.closest('[data-a="closesheet"]'))e.stopPropagation()});
-  $('.sheet [data-a="tt-save"]').addEventListener('click',()=>ttSaveScore(T,m));
-  const upd=()=>{const games=ttReadGames(),r=games.err?null:ttMatchCheck(games.list,need,T.cfg.pts);
+  </section>
+  <div class="stack" style="margin-top:14px">
+    <button class="cta tt" data-a="tt-save">Сохранить результат</button>
+    <button class="ghost" data-a="tt-scorex">Отмена</button>
+  </div>`;
+  const upd=()=>{
+    const v=[];document.querySelectorAll('.gin').forEach(el=>{(v[+el.dataset.g]=v[+el.dataset.g]||['',''])[+el.dataset.s]=el.value});store.ui.scoreVals=v;saveLocal();
+    const games=ttReadGames(),r=games.err?null:ttMatchCheck(games.list,need,T.cfg.pts);
     let wa=0,wb=0;(games.list||[]).forEach(x=>{if(+x[0]>+x[1])wa++;else if(+x[1]>+x[0])wb++});
     $('#msum').innerHTML=`Партии <b>${wa}:${wb}</b>${r&&r.win?` · победа: <b>${r.win==='a'?nA:nB}</b>`:''}`;$('#serr').textContent='';
     document.querySelectorAll('.gin').forEach(el=>{const i=+el.dataset.g,row=[...document.querySelectorAll(`.gin[data-g="${i}"]`)].map(x=>x.value);
       el.classList.toggle('bad',row[0]!==''&&row[1]!==''&&!!ttGameErr(row[0],row[1],T.cfg.pts))})};
-  document.querySelectorAll('.gin').forEach(el=>el.addEventListener('input',upd));upd();
-  const first=document.querySelector('.gin');if(first&&!g.length)first.focus();
+  document.querySelectorAll('.gin').forEach((el,idx,all)=>{el.addEventListener('input',upd);
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const nx=all[idx+1];if(nx)nx.focus();else el.blur()}})});
+  upd();
 }
 function ttReadGames(){
   const rows={};document.querySelectorAll('.gin').forEach(el=>{(rows[el.dataset.g]=rows[el.dataset.g]||[])[+el.dataset.s]=el.value.trim()});
@@ -207,14 +222,16 @@ function ttSaveScore(T,m){
   if(r.err){$('#serr').textContent=r.err;return}
   const c=ttMatchCheck(r.list,need,T.cfg.pts);
   if(c.err){$('#serr').textContent=c.err;return}
-  closeSheet();ttSetResult(T,m,r.list,c.win,null);buzz();touch(T);
-  if(T.stage==='results'){store.ui.tab='play';render();scrollTo(0,0);return}
-  render();toast(`Сохранено: ${c.wa}:${c.wb}`);
+  if(document.activeElement)document.activeElement.blur();
+  store.ui.score=null;store.ui.scoreVals=null;
+  ttSetResult(T,m,r.list,c.win,null);buzz();touch(T);
+  store.ui.tab='play';render();scrollTo(0,0);
+  if(T.stage!=='results')toast(`Сохранено: ${c.wa}:${c.wb}`);
 }
 /* ---------- live scoring with serve hints ---------- */
 function renderTTLive(app,T,m){
   const L=m.live,need=ttNeed(T,m),dbl=T.unit!=='single';
-  const wa=L.games.filter(g=>g[0]>g[1]).length,wb=L.games.length-wa;
+  const D=ttLiveDecided(T,m,L),wa=D.wa,wb=D.wb;
   const started=L.first!=null&&(!dbl||L.dbl);
   if(!started){
     const pa=ttSide(T,m,'a'),pb=ttSide(T,m,'b');
@@ -226,6 +243,23 @@ function renderTTLive(app,T,m){
      :L.first==null?pa.concat(pb).map(p=>`<button class="sportcard" data-a="tt-dserver" data-v="${p}"><span style="min-width:0"><b>${esc(T.players[p])}</b><span>${pa.includes(p)?esc(ttSideName(T,m,'a')):esc(ttSideName(T,m,'b'))}</span></span><span class="chev">›</span></button>`).join('')+`<button class="ghost" data-a="tt-lot">Жребий</button>`
      :(L.first==='a'?pb:pa).map(p=>`<button class="sportcard" data-a="tt-dreceiver" data-v="${p}"><span style="min-width:0"><b>${esc(T.players[p])}</b><span>принимает подачу ${esc(T.players[L.pendingS])}</span></span><span class="chev">›</span></button>`).join('')}
     </div>`;return;
+  }
+  if(D.done){
+    const cool=L.decidedAt&&Date.now()-L.decidedAt<1000;
+    const winName=esc(ttSideName(T,m,wa>wb?'a':'b'));
+    app.innerHTML=`<div class="topbar"><button class="iconbtn" data-a="tt-livex" aria-label="Свернуть">${IC.home}</button><div style="flex:1"></div></div>
+    <div class="eyebrow tt" style="margin-top:14px">${ttPhaseName(T,m)}</div><h1 class="big">Матч окончен</h1>
+    <section class="card" style="margin-top:14px;text-align:center">
+      <div class="lname">${esc(ttSideName(T,m,'a'))} — ${esc(ttSideName(T,m,'b'))}</div>
+      <div class="lpts" style="font-size:72px">${wa}:${wb}</div>
+      <div class="hint">Партии: ${L.games.map(g=>g.join(':')).join(' · ')}</div>
+      <div style="margin-top:8px;font-weight:800">Победа: ${winName}</div>
+    </section>
+    <div class="stack ${cool?'cool':''}" style="margin-top:14px">
+      <button class="cta tt" data-a="tt-livesave">Сохранить результат</button>
+      <button class="ghost" data-a="tt-undo">Отменить последнее очко</button>
+    </div>`;
+    if(cool)setTimeout(()=>{if(store.ui.live===m.id)render()},1000-(Date.now()-L.decidedAt));return;
   }
   const si=ttServeInfo(T,m,L),srvSide=dbl?si.serverSide:si.server;
   const half=s=>{const pts=L.cur[s==='a'?0:1],gw=s==='a'?wa:wb,serving=srvSide===s;
@@ -243,16 +277,19 @@ function renderTTLive(app,T,m){
     <div class="rest" style="justify-content:center;margin-top:6px">Нажимайте на сторону, которая выиграла очко</div>`;
 }
 function ttLiveTap(T,m,side){
-  const ev=ttLivePoint(T,m,m.live,side);buzz();touch(T);
-  if(ev.includes('ends'))toast('Смена сторон');
-  if(ev.includes('match')){
-    render();const L=m.live,wa=L.games.filter(g=>g[0]>g[1]).length,wb=L.games.length-wa;
-    return sheet('Матч окончен',`${esc(ttSideName(T,m,'a'))} — ${esc(ttSideName(T,m,'b'))}: <b>${wa}:${wb}</b> (${L.games.map(g=>g.join(':')).join(', ')})`,[
-      {label:'Сохранить результат',kind:'primary',run:()=>{const c=ttMatchCheck(L.games,ttNeed(T,m),T.cfg.pts);if(c.err){toast(c.err);return}store.ui.live=null;ttSetResult(T,m,L.games,c.win,null);touch(T);render();scrollTo(0,0);toast('Результат сохранён')}},
-      {label:'Отменить последнее очко',run:()=>{ttLiveUndo(m.live);touch(T);render()}}]);
-  }
-  if(ev.includes('game')){const g=m.live.games[m.live.games.length-1];toast(`Партия ${g[0]}:${g[1]} · смена сторон`)}
+  const ev=ttLivePoint(T,m,m.live,side);
+  if(ev.includes('decided'))return render();
+  buzz();touch(T);
+  if(ev.includes('match')){m.live.decidedAt=Date.now();toast('Матч окончен — сохраните результат')}
+  else if(ev.includes('game')){const g=m.live.games[m.live.games.length-1];toast(`Партия ${g[0]}:${g[1]} · смена сторон`)}
+  else if(ev.includes('ends'))toast('Смена сторон');
   render();
+}
+function ttLiveSave(T,m){
+  const L=m.live,c=ttMatchCheck(L.games,ttNeed(T,m),T.cfg.pts);
+  if(c.err){toast(c.err);return}
+  store.ui.live=null;ttSetResult(T,m,L.games,c.win,null);buzz();touch(T);store.ui.tab='play';render();scrollTo(0,0);
+  if(T.stage!=='results')toast(`Сохранено: ${c.wa}:${c.wb}`);
 }
 /* ---------- tables, bracket, results ---------- */
 function ttStandRows(T,R,ids,adv){
@@ -358,7 +395,10 @@ document.addEventListener('click',e=>{
     case 'tt-tables':d.tables=Math.min(ttMaxTables(d),Math.max(1,ttTables(d)+ +b.dataset.d));d.rounds=null;buzz();return redraw();
     case 'tt-rounds':{const P=ttPlan(d);if(!P.ok||!P.step)return;d.rounds=Math.max(P.step,Math.min(Math.floor(60/P.step)*P.step,P.rounds+ +b.dataset.d*P.step));buzz();return redraw()}
     case 'tt-start':return ttStartFromDraft();
-    case 'tt-score':if(M&&M.st!=='done')ttScoreSheet(T,M);return;
+    case 'tt-score':if(M&&M.st!=='done')ttOpenScore(T,M);return;
+    case 'tt-save':{const m=T.matches.find(x=>x.id===store.ui.score);if(m&&m.st!=='done')ttSaveScore(T,m);return}
+    case 'tt-scorex':if(document.activeElement)document.activeElement.blur();store.ui.score=null;store.ui.scoreVals=null;saveLocal();render();return scrollTo(0,0);
+    case 'tt-livesave':{const m=T.matches.find(x=>x.id===store.ui.live);if(m&&m.st!=='done')ttLiveSave(T,m);return}
     case 'tt-live':if(!M||M.st==='done')return;M.live=M.live||{games:[],cur:[0,0],first:null,dbl:null,hist:[]};store.ui.live=M.id;touch(T);render();return scrollTo(0,0);
     case 'tt-livex':store.ui.live=null;saveLocal();return render();
     case 'tt-first':{const m=T.matches.find(x=>x.id===store.ui.live);m.live.first=b.dataset.v;touch(T);return render()}
@@ -377,7 +417,7 @@ document.addEventListener('click',e=>{
       return sheet(ttPhaseName(T,M),`${esc(ttSideName(T,M,'a'))} — ${esc(ttSideName(T,M,'b'))}`,acts)}
     case 'tt-fix':{if(!M)return;const c=ttCanEdit(T,M);if(!c.ok)return sheet('Нельзя исправить',c.why,[]);
       return sheet('Исправить счёт?',`Сейчас: ${M.wo?'техническое поражение':M.games.map(g=>g.join(':')).join(', ')}.${M.ph==='g'&&T.matches.some(x=>x.ph==='ko')?' Сетка плей-офф будет составлена заново после исправления.':''}`,
-        [{label:'Исправить',kind:'primary',run:()=>{const old=M.wo?[]:M.games.slice();ttReopen(T,M);touch(T);store.ui.tab='play';render();ttScoreSheet(T,M,old)}}])}
+        [{label:'Исправить',kind:'primary',run:()=>{const old=M.wo?[]:M.games.slice();ttReopen(T,M);touch(T);store.ui.tab='play';ttOpenScore(T,M,old)}}])}
     case 'tt-menu':{const acts=[{label:'Переименовать',run:()=>renameSheet(T)}];
       if(T.unit!=='rotate'&&T.stage==='play'){const alive=T.entrants.map((x,i)=>i).filter(i=>!T.entrants[i].out);
         acts.push({label:T.unit==='pair'?'Снять пару с турнира':'Снять игрока с турнира',run:()=>sheet(T.unit==='pair'?'Кого снять?':'Кого снять?','Все его оставшиеся матчи засчитаются как техническое поражение.',alive.map(i=>({label:esc(T.entrants[i].name),run:()=>sheet('Снять с турнира?',`${esc(T.entrants[i].name)} — оставшиеся матчи будут засчитаны соперникам. Отменить нельзя.`,[{label:'Снять',kind:'danger',run:()=>{ttWithdraw(T,i);touch(T);render();toast('Снят с турнира')}}])})))})}

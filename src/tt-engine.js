@@ -95,7 +95,10 @@ function ttServeInfo(T,m,L){
   info.serverSide=pa.includes(info.server)?'a':'b';
   return info;
 }
+/* a finished match accepts no more points until it is saved or the last point is undone */
+function ttLiveDecided(T,m,L){const need=ttNeed(T,m),wa=L.games.filter(g=>g[0]>g[1]).length,wb=L.games.length-wa;return {wa,wb,need,done:wa>=need||wb>=need}}
 function ttLivePoint(T,m,L,side){
+  if(ttLiveDecided(T,m,L).done)return ['decided'];
   const pts=T.cfg.pts,need=ttNeed(T,m);
   L.hist.push(JSON.stringify({games:L.games,cur:L.cur,switchAt:L.switchAt,switchBlock:L.switchBlock}));
   L.cur=L.cur.slice();L.cur[side==='a'?0:1]++;
