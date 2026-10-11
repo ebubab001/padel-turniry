@@ -3,7 +3,7 @@ const TT_UNIT={single:'Одиночный',pair:'Постоянные пары',
 const TT_SCHEME={rr:'Круговой',groups:'Группы + плей-офф',ko:'Олимпийская сетка',rotate:'Американо'};
 const TT_MIN={rr:3,ko:3,groups:6};
 let ttPrev={key:'',sched:null};
-function freshTTDraft(){return {name:'',unit:'single',scheme:null,players:[],pts:11,wins:{g:2,ko:3,f:3},rwins:1,tables:2,cycles:null,groupCount:null,advance:2,third:true,consolation:false,seeding:'random',rounds:null}}
+function freshTTDraft(){return {name:'',level:'simple',unit:'single',scheme:null,players:[],pts:11,wins:{g:2,ko:3,f:3},rwins:1,tables:2,cycles:null,groupCount:null,advance:2,third:true,consolation:false,seeding:'random',rounds:null}}
 /* entrants: players (single, rotate) or fixed pairs */
 const ttEntrantCount=d=>d.unit==='pair'?Math.floor(d.players.length/2):d.players.length;
 function ttMaxTables(d){const n=ttEntrantCount(d);return Math.max(1,d.unit==='rotate'?Math.floor(n/4):Math.floor(n/2))}
@@ -40,6 +40,7 @@ function ttPlan(d){
     minutes:ttEstimate(gm,ko-1-third+cons,1+third,d,P.tables)};
 }
 function ttEstimate(gMatches,koMatches,finals,d,tables){
+  if(d.sport==='pc')return Math.round((gMatches+koMatches+finals)*pcMinutes(d)/Math.max(1,tables)*1.1);
   const p=d.pts||11,mins=gMatches*ttMatchMinutes(d.unit==='rotate'?d.rwins:d.wins.g,p)+koMatches*ttMatchMinutes(d.wins.ko,p)+finals*ttMatchMinutes(d.wins.f,p);
   return Math.round(mins/Math.max(1,tables)*1.15);
 }
@@ -70,8 +71,10 @@ function ttMatchCheck(games,need,pts){
   if(wa<need&&wb<need)return {err:`Матч идёт до ${need} ${plural(need,'победы','побед','побед')} в партиях — сейчас ${wa}:${wb}`};
   return {win:wa>wb?'a':'b',wa,wb};
 }
-const ttNeed=(T,m)=>T.unit==='rotate'?T.cfg.rwins:m.final?T.cfg.wins.f:(m.ph==='ko'||m.ph==='third'||m.ph==='cons')?T.cfg.wins.ko:T.cfg.wins.g;
+const ttNeed=(T,m)=>T.sport==='pc'?pcNeed(T.cfg):T.unit==='rotate'?T.cfg.rwins:m.final?T.cfg.wins.f:(m.ph==='ko'||m.ph==='third'||m.ph==='cons')?T.cfg.wins.ko:T.cfg.wins.g;
 
+/* validate a whole match result for either sport */
+const ttCheck=(T,m,games)=>T.sport==='pc'?pcMatchCheck(games,T.cfg):ttMatchCheck(games,ttNeed(T,m),T.cfg.pts);
 /* ---------- live scoring: who serves, when to change ends ---------- */
 /* state: {games:[[a,b]...], cur:[a,b], first:'a'|'b' (singles: side serving first in game 1), dbl:{s,r} player ids for doubles game 1, hist:[]} */
 function ttServeInfo(T,m,L){
@@ -146,8 +149,8 @@ function ttKO(T,list,ph,third){
 }
 function ttStartPlay(d,id){
   const n=ttEntrantCount(d),P=ttPlan(d);if(!P.ok)return {err:P.err};
-  const T={id,sport:'tt',name:'',unit:d.unit,scheme:P.scheme,players:d.players.slice(),entrants:[],matches:[],seq:1,
-    cfg:{pts:d.pts,wins:{...d.wins},rwins:d.rwins,tables:P.tables,cycles:P.cycles||1,groupCount:P.groupCount||null,advance:P.advance||null,third:!!d.third,consolation:!!d.consolation,seeding:d.seeding},
+  const T={id,sport:d.sport==='pc'?'pc':'tt',level:d.level||'simple',name:'',unit:d.unit,scheme:P.scheme,players:d.players.slice(),entrants:[],matches:[],seq:1,
+    cfg:{pts:d.pts,wins:{...d.wins},rwins:d.rwins,deuce:d.deuce,fmt:d.fmt,dec:d.dec,tables:P.tables,cycles:P.cycles||1,groupCount:P.groupCount||null,advance:P.advance||null,third:!!d.third,consolation:!!d.consolation,seeding:d.seeding},
     stage:'play',status:'active',planned:P.matches};
   if(d.unit==='pair')for(let i=0;i<n;i++)T.entrants.push({name:d.players[2*i]+' / '+d.players[2*i+1],m:[2*i,2*i+1]});
   else T.players.forEach((p,i)=>T.entrants.push({name:p,m:[i]}));
@@ -263,19 +266,23 @@ function ttTally(T,ids,matches,key){
     const A=T.unit==='rotate'?m.a:[m.a],B=T.unit==='rotate'?m.b:[m.b];
     const apply=(list,won,wo)=>list.forEach(e=>{const o=s[key(e)];if(!o)return;o.g++;if(won){o.w++;o.mp+=2}else{o.l++;o.mp+=wo?0:1}});
     const aWon=m.win==='a';apply(A,aWon,m.wo==='a');apply(B,!aWon,m.wo==='b');
-    if(!m.wo)m.games.forEach(([x,y])=>{A.forEach(e=>{const o=s[key(e)];if(!o)return;o.pw+=+x;o.pl+=+y;if(+x>+y)o.gw++;else o.gl++});
-      B.forEach(e=>{const o=s[key(e)];if(!o)return;o.pw+=+y;o.pl+=+x;if(+y>+x)o.gw++;else o.gl++})});
+    if(!m.wo)m.games.forEach(g=>{let x,y,gx,gy;
+      if(T.sport==='pc'){x=+g.a;y=+g.b;gx=g.stb?(x>y?1:0):x;gy=g.stb?(y>x?1:0):y}else{x=+g[0];y=+g[1];gx=x;gy=y}
+      A.forEach(e=>{const o=s[key(e)];if(!o)return;o.pw+=gx;o.pl+=gy;if(x>y)o.gw++;else o.gl++});
+      B.forEach(e=>{const o=s[key(e)];if(!o)return;o.pw+=gy;o.pl+=gx;if(y>x)o.gw++;else o.gl++})});
   });
   return s;
 }
 const ttRatio=(a,b)=>b===0?(a===0?1:Infinity):a/b;
 function ttRank(T,ids,matches){
-  const key=e=>e;const tieInfo={};
+  const key=e=>e;const tieInfo={};const all=ttTally(T,ids,matches,key);
   const resolve=(sub)=>{
     if(sub.length<=1)return sub;
     const inner=matches.filter(m=>sub.includes(m.a)&&sub.includes(m.b));
     const s=ttTally(T,sub,inner,key);
-    const crit=[e=>s[e].mp,e=>ttRatio(s[e].gw,s[e].gl),e=>ttRatio(s[e].pw,s[e].pl)];
+    const crit=T.sport==='pc'
+      ?[e=>s[e].mp,e=>s[e].gw-s[e].gl,e=>s[e].pw-s[e].pl,e=>all[e].gw-all[e].gl,e=>all[e].pw-all[e].pl]
+      :[e=>s[e].mp,e=>ttRatio(s[e].gw,s[e].gl),e=>ttRatio(s[e].pw,s[e].pl)];
     for(const c of crit){
       const vals=[...new Set(sub.map(c))];
       if(vals.length>1){vals.sort((x,y)=>y-x);return vals.flatMap(v=>resolve(sub.filter(e=>c(e)===v)))}
@@ -283,7 +290,6 @@ function ttRank(T,ids,matches){
     sub.forEach(e=>tieInfo[e]=true);
     return sub.slice().sort((x,y)=>T.entrants[x].lot-T.entrants[y].lot);
   };
-  const all=ttTally(T,ids,matches,key);
   const byMp=[...new Set(ids.map(e=>all[e].mp))].sort((x,y)=>y-x);
   const order=byMp.flatMap(v=>resolve(ids.filter(e=>all[e].mp===v)));
   return {order,stats:all,lot:tieInfo};
