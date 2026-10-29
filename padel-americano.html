@@ -583,11 +583,14 @@ function nearFull(n){let lo=n,hi=n;while(lo%4>1)lo--;while(hi%4>1)hi++;return {l
 
 /* ================= render ================= */
 const cur=()=>store.tournaments[store.ui.id];
+/* Виды спорта. Настольный теннис выключен (код сохранён): чтобы вернуть, поставить tt:true */
+const SPORTS_ON={tt:false};
 function go(screen,id,tab){store.ui={screen,id:id??store.ui.id,tab:tab||'play'};saveLocal();render();scrollTo(0,0);tgClosingGuard()}
 function render(){
   const s=store.ui.screen,T=cur();
   if((s==='play'||s==='view')&&(!T||T.deleted)){store.ui={screen:'home',id:null,tab:'play'};}
   const app=$('#app');
+  if(!SPORTS_ON.tt&&(store.ui.screen==='sport'||store.ui.screen==='ttsetup'))store.ui.screen='setup';
   if(store.ui.screen==='sport'){$('#tabbar').innerHTML='';return renderSportPick(app)}
   if(store.ui.screen==='setup'){$('#tabbar').innerHTML='';return renderSetup(app)}
   if(store.ui.screen==='ttsetup'){$('#tabbar').innerHTML='';return renderTTSetup(app)}
@@ -676,7 +679,7 @@ function renderSetup(app){
         :`У каждого будет ровно <b>${P.games}</b> ${plural(P.games,'игра','игры','игр')}${n-P.act?` · в раунде отдыхают ${n-P.act}, по очереди`:''}`}.</div>`;
   }
   app.innerHTML=`
-  <div class="topbar"><button class="iconbtn" data-a="new" aria-label="Назад">${IC.home}</button><div style="flex:1"></div></div>
+  <div class="topbar"><button class="iconbtn" data-a="${SPORTS_ON.tt?'new':'home'}" aria-label="Назад">${IC.home}</button><div style="flex:1"></div></div>
   <div class="eyebrow" style="margin-top:14px">Падел · новый турнир</div>
   <h1 class="big">Настройка</h1>
   <div class="stack" style="margin-top:14px">
@@ -2165,7 +2168,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,d=curDraft(),T=cur();
   switch(a){
     case 'home':return go('home',null);
-    case 'new':return go('sport',null);
+    case 'new':return go(SPORTS_ON.tt?'sport':'setup',null);
     case 'open':{const t=store.tournaments[b.dataset.id];return go(t.status==='finished'?'view':'play',t.id,'play')}
     case 'fmt':d.format=b.dataset.v;d.rounds=null;saveLocal();return render();
     case 'rm':d.players.splice(+b.dataset.i,1);d.sample=false;d.rounds=null;saveLocal();return render();
