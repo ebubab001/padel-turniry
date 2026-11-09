@@ -602,14 +602,24 @@ function planFor(d){
     if(n%4<2){
       const key='am#'+d.players.join('\u0001')+'#'+c;
       if(preview.key!==key)preview={key,rounds:buildAmericanoFull(n,c)};
-      const perRound=Math.floor(n/4);
-      return {ok:true,plan:'full',total:preview.rounds.length,games:n-1,act,usedCourts:Math.min(c,perRound),perRound,packed:c<perRound};
+      const perRound=Math.floor(n/4),fullTotal=preview.rounds.length,opts=roundOptions(n,c,fullTotal,act);
+      /* Сокращённый турнир: меньше раундов, не все сыграют друг с другом в паре, зато у всех поровну игр */
+      if(d.rounds&&d.rounds<fullTotal&&opts.includes(d.rounds))return {ok:true,plan:'equal',short:true,total:d.rounds,games:d.rounds*act/n,act,step:restStep(n,c),def:fullTotal,opts,fullTotal};
+      return {ok:true,plan:'full',total:fullTotal,games:n-1,act,usedCourts:Math.min(c,perRound),perRound,packed:c<perRound,opts,fullTotal};
     }
     const def=Math.ceil((n-1)/step)*step,R=pick(def);
     return {ok:true,plan:'equal',total:R,games:R*act/n,act,step,def};
   }
   const def=step===1?6:Math.ceil(5/step)*step,R=pick(def);
   return {ok:true,plan:'mex',total:R,games:R*act/n,act,step,def};
+}
+/* Допустимое число раундов: кратно шагу, при котором у всех поровну игр, и у каждого не меньше 2 игр */
+function roundOptions(n,c,full,act){const step=restStep(n,c),o=[];for(let r=step;r<full;r+=step)if(r*act/n>=2)o.push(r);o.push(full);return o}
+/* Примерное время турнира: раунды идут по очереди, все корты играют одновременно */
+function timeBlock(d,P){
+  if(!P.ok)return '';
+  const pts=d.mode==='sum'?d.limit:Math.round(d.limit*1.6),lo=Math.round((pts*.45+1)*P.total/5)*5,hi=Math.round((pts*.7+2)*P.total/5)*5;
+  return `<div class="info">Примерное время: <b>от ${fmtMinutes(lo)} до ${fmtMinutes(hi)}</b> (${P.total} ${plural(P.total,'раунд','раунда','раундов')})<br><span style="font-weight:500">Считаем 0,45-0,7 мин на очко и 1-2 мин на смену пар, все корты играют одновременно. Если у вас темп другой, ориентируйтесь на свой.</span></div>`;
 }
 function nearFull(n){let lo=n,hi=n;while(lo%4>1)lo--;while(hi%4>1)hi++;return {lo,hi}}
 
@@ -696,11 +706,14 @@ function renderSetup(app){
       ${P.pairsN%2?'<br>Пар нечётное число — в каждом раунде одна пара отдыхает, каждая по одному разу.':''}
       ${P.packed?`<br>Кортов меньше максимума (${P.perRound}) — часть пар ждёт, но у всех всё равно по ${P.games} ${plural(P.games,'игре','игры','игр')}.`:''}</div>`;
   }
-  else if(P.plan==='full'){
-    roundsBlock=`<div class="row"><div><div style="font-weight:800">Раунды</div><div class="hint" style="margin:0">Фиксировано форматом</div></div><span class="fixed">${P.total}</span></div>
-      <div class="info">${IC.check} Каждый сыграет с каждым в паре <b>ровно 1 раз</b>. У всех по <b>${P.games}</b> ${plural(P.games,'игре','игры','игр')}, поэтому очки сравнимы честно.
+  else if(P.opts){
+    const full=P.plan==='full';
+    roundsBlock=`<div class="row"><div><div style="font-weight:800">Раунды</div><div class="hint" style="margin:0">${full?'Полный круг. Можно сократить кнопкой «−»':'Сокращённый турнир'}</div></div>
+        <div class="stepper"><button data-a="rstep" data-d="-1" aria-label="Меньше раундов">−</button><span class="val">${P.total}</span><button data-a="rstep" data-d="1" aria-label="Больше раундов">+</button></div></div>
+      <div class="info">${full?`${IC.check} Каждый сыграет с каждым в паре <b>ровно 1 раз</b>. У всех по <b>${P.games}</b> ${plural(P.games,'игре','игры','игр')}, поэтому очки сравнимы честно.
       ${n%4===1?'<br>В каждом раунде 1 игрок отдыхает — каждый отдохнёт по одному разу.':''}
-      ${P.packed?`<br>Кортов меньше, чем нужно (${P.perRound}) — часть игроков ждёт, но у всех всё равно по ${P.games} ${plural(P.games,'игре','игры','игр')}.`:''}</div>`;
+      ${P.packed?`<br>Кортов меньше, чем нужно (${P.perRound}) — часть игроков ждёт, но у всех всё равно по ${P.games} ${plural(P.games,'игре','игры','игр')}.`:''}`
+      :`У всех будет ровно <b>${P.games}</b> ${plural(P.games,'игра','игры','игр')}${n-P.act?` · в раунде отдыхают ${n-P.act}, по очереди`:''}. Не все сыграют друг с другом в паре, но партнёры по возможности не повторяются. Нажмите «+», чтобы вернуться к полному кругу (${P.fullTotal} ${plural(P.fullTotal,'раунд','раунда','раундов')}).`}</div>`;
   }else{
     const nf=nearFull(n);
     roundsBlock=`${P.plan==='equal'?`<div class="warn"><b>При ${n} игроках «каждый с каждым» невозможно</b> — это математика, а не ограничение приложения: число пар (${n*(n-1)/2}) не делится на матчи без остатка.<br>
@@ -756,7 +769,7 @@ function renderSetup(app){
       <div class="row"><div><div style="font-weight:800">Корты</div>${n>=4?`<div class="hint" style="margin:0">${effCourts(d)>=maxCourts(d)?`Максимум для ${n} ${plural(n,'игрока','игроков','игроков')}`:`Максимум ${maxCourts(d)} — сейчас часть ${PAIRF(d.format)?'пар':'игроков'} будет ждать`}</div>`:''}</div>
         <div class="stepper"><button data-a="cstep" data-d="-1" aria-label="Меньше кортов">−</button><span class="val">${effCourts(d)}</span><button data-a="cstep" data-d="1" aria-label="Больше кортов">+</button></div></div>
       <div class="row" style="display:block">${courtNumsBlock(d,effCourts(d),MEXF(d.format)?' Самая сильная группа по таблице играет на первом корте.':'')}</div>
-      <div class="row" style="display:block">${roundsBlock}</div>
+      <div class="row" style="display:block">${roundsBlock}${timeBlock(d,P)}</div>
       <div class="err" id="e-cfg"></div>
     </section>
     <button class="cta" data-a="start">Начать турнир ${IC.arrow}</button>
@@ -2375,7 +2388,8 @@ document.addEventListener('click',e=>{
     case 'scheme':d.scheme=b.dataset.v;saveLocal();return render();
     case 'cstep':d.courts=Math.min(maxCourts(d),Math.max(1,effCourts(d)+ +b.dataset.d));d.rounds=null;buzz();saveLocal();return render();
     case 'cystep':d.cycles=Math.min(4,Math.max(1,(d.cycles||1)+ +b.dataset.d));buzz();saveLocal();return render();
-    case 'rstep':{const P=planFor(d);if(!P.ok)return;d.rounds=Math.min(Math.max(P.step,Math.floor(60/P.step)*P.step),Math.max(P.step,P.total+ +b.dataset.d*P.step));buzz();saveLocal();return render()}
+    case 'rstep':{const P=planFor(d);if(!P.ok)return;
+      if(P.opts){const i=P.opts.indexOf(P.total),j=Math.min(P.opts.length-1,Math.max(0,i+ +b.dataset.d));d.rounds=P.opts[j]===P.fullTotal?null:P.opts[j];buzz();saveLocal();return render()}d.rounds=Math.min(Math.max(P.step,Math.floor(60/P.step)*P.step),Math.max(P.step,P.total+ +b.dataset.d*P.step));buzz();saveLocal();return render()}
     case 'start':return startTournament();
     case 'pl-open':{const i=+b.dataset.i;plUI=plUI&&plUI.i===i&&plUI.tid===T.id?null:{tid:T.id,i,mode:null};return render()}
     case 'pl-mode':plUI.mode=b.dataset.m;return render();
