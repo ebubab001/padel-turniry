@@ -55,6 +55,18 @@ input{font:inherit}
 .fixed{font-family:var(--f-display);font-weight:800;font-size:22px;background:var(--mist);padding:8px 14px;border-radius:14px;flex:none}
 .textin{width:100%;height:52px;border-radius:16px;border:2px solid var(--mist);padding:0 14px;color:var(--ink);background:var(--paper);font-weight:700;font-size:17px}
 .textin:focus{border-color:var(--court);outline:none}
+.pl+.pl{border-top:1.5px solid var(--mist)}
+.plhead{display:grid;grid-template-columns:34px minmax(0,1fr) 20px;gap:12px;align-items:center;width:100%;padding:12px 0;text-align:left;color:var(--ink)}
+.plnum{width:34px;height:34px;border-radius:12px;background:var(--mist);display:grid;place-items:center;font-weight:800;font-size:14px;color:var(--mute)}
+.plchev{font-size:24px;color:var(--mute);transition:transform .15s}.plchev.o{transform:rotate(90deg)}
+.plpanel{padding:0 0 14px 46px}
+.plpanel .textin{width:100%;height:50px;font-size:16px}
+.plbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.plbtn{padding:12px 14px;border-radius:14px;background:var(--mist);font-weight:800;font-size:14px;color:var(--ink)}
+.plbtn.go{background:var(--ink);color:#fff}
+.plbtn.danger{color:var(--coral)}
+.plbtn:disabled{opacity:.4}
+.outtag{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;background:var(--mist);color:var(--mute);font-size:11px;font-weight:800;vertical-align:middle}
 .cnums{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .cnum{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--mute)}
 .cnum .textin{width:64px;height:46px;text-align:center;font-size:18px;font-weight:800;padding:0}
@@ -104,7 +116,7 @@ input{font:inherit}
 .court.isdone{background:#F6F8FF}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center}
 .tabbar nav{display:flex;gap:4px;background:rgba(10,18,64,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:6px;border-radius:var(--r-pill);box-shadow:0 12px 30px rgba(5,10,60,.4)}
-.tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 18px;border-radius:var(--r-pill);color:rgba(255,255,255,.7);font-size:12px;font-weight:800}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;border-radius:var(--r-pill);color:rgba(255,255,255,.7);font-size:12px;font-weight:800}
 .tabbar button.on{background:var(--ball);color:var(--ink)}
 .tabbar svg{width:22px;height:22px}
 .lb-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0}
@@ -258,6 +270,7 @@ const IC={
   table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 21V11M16 21V5M4 21v-6M20 21v-9"/></svg>',
   grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 12h16M12 4v16"/></svg>',
   trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.4-3.3 2.7-5 5.5-5s5.1 1.7 5.5 5M16 5.2a3 3 0 0 1 0 5.6M17.5 14.2c1.8.5 3 2.1 3.3 4.8"/></svg>',
   dots:'<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
   home:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   check:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
@@ -394,8 +407,8 @@ function circleRounds(n){
   }
   return R;
 }
-function assignServers(rounds,n){
-  const serves=Array(n).fill(0);
+function assignServers(rounds,n,base){
+  const serves=base?base.slice():Array(n).fill(0);
   rounds.forEach(R=>R.matches.forEach(m=>{
     const four=shuffle(m.t1.concat(m.t2)).sort((p,q)=>serves[p]-serves[q]);
     m.server=four[0];serves[four[0]]++;
@@ -466,13 +479,13 @@ function buildEqualGames(n,courts,rounds){
 /* Mexicano: round 1 random, then by current standings in blocks of four */
 /* Team Mexicano: fixed pairs; round 1 random, then pairs with close standings meet (avoiding an immediate rematch when possible) */
 function teamMexRound(T){
-  const n=T.players.length,pairs=T.pairs,P=pairs.length,prev=T.rounds;
+  const n=T.players.length,pairs=T.pairs,aliveP=pairs.map((_,k)=>k).filter(k=>!isOut(T,pairs[k][0])),P=aliveP.length,prev=T.rounds;
   const playN=2*Math.min(T.cfg.courts,Math.floor(P/2));
-  const rest=Array(P).fill(0),lastRest=Array(P).fill(-1),serves=Array(n).fill(0),lastOpp=Array(P).fill(-1);
+  const rest=Array(pairs.length).fill(0),lastRest=Array(pairs.length).fill(-1),serves=Array(n).fill(0),lastOpp=Array(pairs.length).fill(-1);
   const pairOf={};pairs.forEach(([a,b],k)=>{pairOf[a]=k;pairOf[b]=k});
   prev.forEach((R,ri)=>{pairs.forEach(([a],k)=>{if(R.sit.includes(a)){rest[k]++;lastRest[k]=ri}});R.matches.forEach(m=>serves[m.server]++)});
   if(prev.length)prev[prev.length-1].matches.forEach(m=>{const x=pairOf[m.t1[0]],y=pairOf[m.t2[0]];lastOpp[x]=y;lastOpp[y]=x});
-  const order=shuffle([...Array(P).keys()]).sort((a,b)=>rest[a]-rest[b]||lastRest[a]-lastRest[b]);
+  const order=shuffle(aliveP.slice()).sort((a,b)=>rest[a]-rest[b]||lastRest[a]-lastRest[b]);
   const sitP=order.slice(0,P-playN),playing=new Set(order.slice(P-playN));
   const ranked=prev.length?standings(T).st.map(s=>s.i).filter(k=>playing.has(k)):shuffle([...playing]);
   for(let k=0;k+3<ranked.length;k+=2)if(lastOpp[ranked[k]]===ranked[k+1]){const t=ranked[k+1];ranked[k+1]=ranked[k+2];ranked[k+2]=t}
@@ -491,11 +504,11 @@ function teamMexRound(T){
 }
 function mexicanoRound(T){
   if(T.format==='teammex')return teamMexRound(T);
-  const n=T.players.length,act=activeCount(n,T.cfg.courts),prev=T.rounds;
+  const n=T.players.length,alive=aliveIdx(T),na=alive.length,act=activeCount(na,T.cfg.courts),prev=T.rounds;
   const rest=Array(n).fill(0),lastRest=Array(n).fill(-1),serves=Array(n).fill(0);
   prev.forEach((R,ri)=>{R.sit.forEach(p=>{rest[p]++;lastRest[p]=ri});R.matches.forEach(m=>serves[m.server]++)});
-  const order=shuffle([...Array(n).keys()]).sort((a,b)=>rest[a]-rest[b]||lastRest[a]-lastRest[b]);
-  const sit=order.slice(0,n-act),playing=new Set(order.slice(n-act));
+  const order=shuffle(alive.slice()).sort((a,b)=>rest[a]-rest[b]||lastRest[a]-lastRest[b]);
+  const sit=order.slice(0,na-act),playing=new Set(order.slice(na-act));
   const ranked=prev.length?stats(T).st.map(s=>s.i).filter(p=>playing.has(p)):shuffle([...playing]);
   const matches=[];
   for(let k=0;k<ranked.length;k+=4){
@@ -512,30 +525,30 @@ function mexicanoRound(T){
 
 /* ================= standings: places strictly by Δ ================= */
 function stats(T){
-  const st=T.players.map((name,i)=>({i,name,g:0,w:0,f:0,a:0}));
+  const st=T.players.map((name,i)=>({i,name,g:0,w:0,f:0,a:0,out:isOut(T,i)}));
   T.rounds.forEach(r=>r.matches.forEach(m=>{if(!m.done)return;const s1=+m.s1,s2=+m.s2;
     m.t1.forEach(p=>{const o=st[p];o.g++;o.f+=s1;o.a+=s2;if(s1>s2)o.w++});
     m.t2.forEach(p=>{const o=st[p];o.g++;o.f+=s2;o.a+=s1;if(s2>s1)o.w++});
   }));
   st.forEach(s=>s.d=s.f-s.a);
-  st.sort((x,y)=>y.d-x.d||y.f-x.f||x.name.localeCompare(y.name));
+  return rankRows(st);
+}
+/* Places go to those still in the tournament, strictly by Δ; players who left stay in the table below, without a place */
+function rankRows(all){
+  const cmp=(x,y)=>y.d-x.d||y.f-x.f||x.name.localeCompare(y.name);
+  const st=all.filter(s=>!s.out).sort(cmp),gone=all.filter(s=>s.out).sort(cmp);
   let ties=false;
   st.forEach(s=>{const f=st.findIndex(o=>o.d===s.d);let l=f;while(l+1<st.length&&st[l+1].d===s.d)l++;
     s.p1=f+1;s.place=f===l?String(f+1):(f+1)+'–'+(l+1);s.tie=f!==l;if(s.tie&&s.g)ties=true});
-  const gs=new Set(st.map(s=>s.g));
-  return {st,ties,unequal:gs.size>1};
+  gone.forEach(s=>{s.p1=99;s.place='—';s.tie=false});
+  return {st:st.concat(gone),ties,unequal:new Set(st.map(s=>s.g)).size>1};
 }
 /* What the leaderboard shows: players, or pairs in Team Americano (both partners always have identical numbers) */
 function standings(T){
   const base=stats(T);
   if(!PAIRF(T.format))return base;
   const by={};base.st.forEach(s=>by[s.i]=s);
-  const st=(T.pairs||pairsOf(T.players)).map(([a,b],k)=>{const s=by[a];return {i:k,name:T.players[a]+' и '+T.players[b],g:s.g,w:s.w,f:s.f,a:s.a,d:s.d}});
-  st.sort((x,y)=>y.d-x.d||y.f-x.f||x.name.localeCompare(y.name));
-  let ties=false;
-  st.forEach(s=>{const f=st.findIndex(o=>o.d===s.d);let l=f;while(l+1<st.length&&st[l+1].d===s.d)l++;
-    s.p1=f+1;s.place=f===l?String(f+1):(f+1)+'–'+(l+1);s.tie=f!==l;if(s.tie&&s.g)ties=true});
-  return {st,ties,unequal:new Set(st.map(s=>s.g)).size>1};
+  return rankRows((T.pairs||pairsOf(T.players)).map(([a,b],k)=>{const s=by[a];return {i:k,name:T.players[a]+' и '+T.players[b],g:s.g,w:s.w,f:s.f,a:s.a,d:s.d,out:s.out}}));
 }
 function validScore(T,a,b){
   const L=T.cfg.limit;
@@ -789,6 +802,7 @@ function renderTabbar(T){
     <button data-a="tab" data-v="play" class="${t==='play'?'on':''}">${res?IC.trophy:IC.ball}${res?'Итоги':'Игра'}</button>
     <button data-a="tab" data-v="table" class="${t==='table'?'on':''}">${IC.table}Таблица</button>
     <button data-a="tab" data-v="grid" class="${t==='grid'?'on':''}">${IC.grid}Сетка</button>
+    <button data-a="tab" data-v="players" class="${t==='players'?'on':''}">${IC.users}Игроки</button>
   </nav></div>`;
 }
 function header(T,title){
@@ -805,6 +819,7 @@ function renderTournament(app,T){
   const t=store.ui.tab;
   if(t==='table'){const {st,ties,unequal}=standings(T);app.innerHTML=`${header(T,'<h1 class="big" style="margin-top:14px">Таблица</h1>')}<div class="stack" style="margin-top:14px">${leaderboard(T,st,ties,unequal)}</div>`;return}
   if(t==='grid')return renderGrid(app,T);
+  if(t==='players')return renderPlayers(app,T);
   if(T.stage==='results')return renderResults(app,T);
   renderPlay(app,T);
 }
@@ -857,10 +872,10 @@ function leaderboard(T,st,ties,unequal){
     <div class="row" style="margin-bottom:4px"><div class="label" style="margin:0">${PAIRF(T.format)?'Пара':'Игрок'}</div><div class="label" style="margin:0">Δ</div></div>
     ${st.map(s=>`<div class="lb-row">
       <span class="place ${any&&s.p1<=3?'p'+s.p1:''} ${s.tie?'tie':''}">${any?s.place:'—'}</span>
-      <div style="min-width:0"><div class="lb-name">${esc(s.name)}</div>
+      <div style="min-width:0"><div class="lb-name">${esc(s.name)}${s.out?'<span class="outtag">выбыл</span>':''}</div>
         <div class="lb-meta">${s.g} ${plural(s.g,'игра','игры','игр')} · ${s.w} ${plural(s.w,'победа','победы','побед')} · забито ${s.f} · пропущено ${s.a}</div></div>
       <span class="delta ${s.d>0?'pos':s.d<0?'neg':'zero'}">${fmtD(s.d)}</span></div>`).join('')}
-    <div class="hint" style="margin-top:12px">Места — по Δ = забито − пропущено.${ties?' При равной Δ игроки делят место; внутри группы — по забитым очкам.':''}${unequal&&T.stage!=='play'?' <b style="color:var(--coral)">Внимание: у игроков разное число игр — турнир сыгран не полностью.</b>':''}</div>
+    <div class="hint" style="margin-top:12px">Места — по Δ = забито − пропущено.${ties?' При равной Δ игроки делят место; внутри группы — по забитым очкам.':''}${unequal&&T.stage!=='play'?' <b style="color:var(--coral)">'+(T.out&&T.out.length?'Внимание: из-за замен и выбывших у игроков разное число игр.':'Внимание: у игроков разное число игр — турнир сыгран не полностью.')+'</b>':''}</div>
   </section>`;
 }
 
@@ -881,7 +896,7 @@ function renderGrid(app,T){
 }
 
 function podiumHTML(st){
-  const top=st.slice(0,3),h=[150,110,84],bg=['var(--gold)','var(--silver)','var(--bronze)'];
+  const top=st.filter(s=>!s.out).slice(0,3),h=[150,110,84],bg=['var(--gold)','var(--silver)','var(--bronze)'];
   return `<div class="podium">${[1,0,2].filter(i=>top[i]).map(i=>{const s=top[i];return `<div class="pod"><span class="nm">${esc(s.name)}</span>
       <div class="blk" style="height:${h[i]}px;background:${bg[Math.min(s.p1,3)-1]}"><span>${s.place}</span><small>Δ ${fmtD(s.d)}</small></div></div>`}).join('')}</div>`;
 }
@@ -932,7 +947,7 @@ function padelCardData(T){
   const {st}=standings(T),champs=st.filter(s=>s.p1===1),pairsF=PAIRF(T.format);
   return {sport:'ПАДЕЛ',meta:`${FMT[T.format]} · ${dateRu(T.finishedAt||T.createdAt)} · до ${T.cfg.limit}`,champLabel:pairsF||champs.length>1?'ЧЕМПИОНЫ':'ЧЕМПИОН',
     champ:champs.map(s=>s.name).join(pairsF?', ':' и '),champSub:`Δ ${fmtD(st[0].d)} · ${st[0].f}:${st[0].a}`,head:[pairsF?'ПАРА':'ИГРОК','Δ'],
-    rows:st.map(s=>({name:s.name,place:s.place,p1:s.p1,tie:s.tie,mid:`${s.f}:${s.a}`,pill:fmtD(s.d),kind:s.d>0?'pos':s.d<0?'neg':'zero',sub:'Δ '+fmtD(s.d)})),foot:'Места — по Δ (забито − пропущено)'};
+    rows:st.map(s=>({name:s.name+(s.out?' (выбыл)':''),place:s.place,p1:s.p1,tie:s.tie,mid:`${s.f}:${s.a}`,pill:fmtD(s.d),kind:s.d>0?'pos':s.d<0?'neg':'zero',sub:'Δ '+fmtD(s.d)})),foot:'Места — по Δ (забито − пропущено)'};
 }
 async function resultCard(T){
   try{await Promise.all(['800 64px Unbounded','700 30px Unbounded','800 30px Manrope','700 28px Manrope'].map(f=>document.fonts.load(f,'Падел турниры ABC')))}catch(e){}
@@ -956,7 +971,7 @@ async function resultCard(T){
   /* podium */
   y+=50;const podTop=y,podH=430;
   x.fillStyle=C.paper;rrect(x,P,podTop,W-2*P,podH,40);x.fill();
-  const top=T.sport==='tt'||T.sport==='pc'?[1,2,3].map(p=>st.find(r=>r.p1===p)):st.slice(0,3),gap=24,bw=(W-2*P-2*40-2*gap)/3,hs=[250,190,140],cols=[C.gold,C.silver,C.bronze];
+  const top=T.sport==='tt'||T.sport==='pc'?[1,2,3].map(p=>st.find(r=>r.p1===p)):st.filter(s=>!s.out).slice(0,3),gap=24,bw=(W-2*P-2*40-2*gap)/3,hs=[250,190,140],cols=[C.gold,C.silver,C.bronze];
   [1,0,2].forEach((i,slot)=>{const s=top[i];if(!s)return;
     const bx=P+40+slot*(bw+gap),bh=hs[i],by=podTop+podH-30-bh;
     x.fillStyle=cols[Math.min(s.p1,3)-1];rrect(x,bx,by,bw,bh,26);x.fill();
@@ -2145,6 +2160,159 @@ function sheet(title,text,actions,body){
 function closeSheet(){$('#sheet').innerHTML=''}
 function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
 
+/* ================= игроки во время турнира: имя, замена, выбывший ================= */
+let plUI=null;
+function isOut(T,i){return !!(T.out&&T.out.includes(i))}
+function aliveIdx(T){return T.players.map((_,i)=>i).filter(i=>!isOut(T,i))}
+function nameErr(T,name,self){
+  const v=String(name).trim();
+  if(!v)return 'Введите имя';
+  if(v.length>40)return 'Не больше 40 символов';
+  if(T.players.some((p,i)=>i!==self&&p.toLowerCase()===v.toLowerCase()))return 'Такое имя уже есть в турнире';
+  return '';
+}
+/* Замену и удаление можно делать, только пока турнир идёт и счёт сыгранных матчей не открыт на исправление */
+function rosterBlock(T){
+  if(T.stage!=='play')return 'Турнир уже сыгран: здесь можно только изменить имя.';
+  if(T.rounds.slice(T.round+1).some(r=>r.matches.some(m=>m.done)))return 'Сначала закончите исправление счёта в «Сетке».';
+  return '';
+}
+function replaceErr(T,name){return nameErr(T,name,-1)||rosterBlock(T)}
+/* Новый игрок встаёт на место ушедшего во всех несыгранных матчах; сыгранные остаются за прежним */
+function doReplace(T,i,name){
+  const j=T.players.length,sw=p=>p===i?j:p;
+  T.players.push(String(name).trim());T.out=(T.out||[]).concat(i);T.repl=T.repl||{};T.repl[i]=j;
+  for(let r=T.round;r<T.rounds.length;r++){const R=T.rounds[r];
+    R.matches.forEach(m=>{if(m.done)return;m.t1=m.t1.map(sw);m.t2=m.t2.map(sw);if(m.server===i)m.server=j});
+    R.sit=R.sit.map(sw)}
+  touch(T);
+}
+/* Раунд, в котором ещё ничего не сыграно и не введено: его можно составить заново */
+const started=m=>m.done||m.s1!==''||m.s2!=='';
+const freshRound=R=>R.matches.every(m=>!started(m));
+function removeErr(T,i){
+  const er=rosterBlock(T);if(er)return er;
+  if(aliveIdx(T).filter(p=>p!==i).length<4)return 'Нужно минимум 4 игрока.';
+  const R=T.rounds[T.round];
+  if(!freshRound(R)&&R.matches.some(m=>!m.done&&m.t1.concat(m.t2).includes(i))&&!R.sit.some(p=>p!==i&&!isOut(T,p)))return 'Он сейчас играет, а свободных игроков нет. Закончите эту игру или нажмите «Заменить на другого».';
+  return '';
+}
+function doRemove(T,i){
+  const R=T.rounds[T.round],fresh=freshRound(R);
+  T.out=(T.out||[]).concat(i);
+  if(fresh){
+    T.rounds.length=T.round;
+    if(MEXF(T.format))T.rounds.push(mexicanoRound(T));else rebuildFuture(T,T.round);
+  }else{
+    const bad=R.matches.find(m=>!m.done&&m.t1.concat(m.t2).includes(i));
+    if(bad){
+      const g={};stats(T).st.forEach(s=>g[s.i]=s.g);
+      const s=R.sit.filter(p=>p!==i&&!isOut(T,p)).sort((a,b)=>g[a]-g[b])[0];
+      bad.t1=bad.t1.map(p=>p===i?s:p);bad.t2=bad.t2.map(p=>p===i?s:p);if(bad.server===i)bad.server=s;
+      R.sit=R.sit.filter(p=>p!==s);
+    }
+    R.sit=R.sit.filter(p=>p!==i);
+    if(!MEXF(T.format))rebuildFuture(T,T.round+1);
+  }
+  touch(T);
+}
+/* Американо: раунды, начиная с номера from, составляются заново на тех, кто остался; у всех должно получиться поровну игр */
+function rebuildFuture(T,from){
+  const n=T.players.length,alive=aliveIdx(T),na=alive.length,courts=Math.max(1,Math.min(T.cfg.courts,Math.floor(na/4)));
+  const kept=T.rounds.slice(0,from),P0=zeros(n),O0=zeros(n),rest0=Array(n).fill(0),last0=Array(n).fill(-1),games0=Array(n).fill(0),serves0=Array(n).fill(0);
+  const pairUp=(P,O,m)=>{const [a,b]=m.t1,[x,y]=m.t2;P[a][b]++;P[b][a]++;P[x][y]++;P[y][x]++;[[a,x],[a,y],[b,x],[b,y]].forEach(([p,q])=>{O[p][q]++;O[q][p]++})};
+  kept.forEach((R,ri)=>{R.matches.forEach(m=>{pairUp(P0,O0,m);m.t1.concat(m.t2).forEach(p=>games0[p]++);serves0[m.server]++});R.sit.forEach(p=>{rest0[p]++;last0[p]=ri})});
+  const act=activeCount(na,courts);
+  const build=F=>{
+    const g=games0.slice(),rs=rest0.slice(),lr=last0.slice(),P=P0.map(r=>r.slice()),O=O0.map(r=>r.slice()),out=[];
+    for(let r=0;r<F;r++){
+      const order=shuffle(alive.slice()).sort((a,b)=>g[b]-g[a]||rs[a]-rs[b]||lr[a]-lr[b]);
+      const sit=order.slice(0,na-act),play=order.slice(na-act);
+      sit.forEach(p=>{rs[p]++;lr[p]=kept.length+r});
+      let best=null,bc=1e9;
+      for(let t=0;t<800;t++){
+        const s=shuffle(play);let c=0;const ms=[];
+        for(let k=0;k<s.length;k+=4){const [a,b,x,y]=s.slice(k,k+4);c+=(P[a][b]+P[x][y])*100+(O[a][x]+O[a][y]+O[b][x]+O[b][y])*5;ms.push({t1:[a,b],t2:[x,y]})}
+        if(c<bc){bc=c;best=ms;if(c===0)break}
+      }
+      best.forEach(m=>{pairUp(P,O,m);m.t1.concat(m.t2).forEach(p=>g[p]++)});
+      out.push({matches:best,sit:sit.slice().sort((a,b)=>a-b)});
+    }
+    const v=alive.map(p=>g[p]);
+    return {out,spread:Math.max(...v)-Math.min(...v)};
+  };
+  /* число раундов близко к задуманному (не больше +3): берём тот вариант, где у игроков меньше всего разница в числе игр */
+  const F0=Math.max(0,T.cfg.total-kept.length);let res=null;
+  for(let F=F0;F<=F0+3&&(!res||res.spread>0);F++){const b=build(F);if(!res||b.spread<res.spread)res=b}
+  T.rounds=kept.concat(assignServers(res.out,n,serves0));
+  T.cfg.total=T.rounds.length;
+  if(T.round>=T.rounds.length){T.round=Math.max(0,T.rounds.length-1);T.stage='results'}
+}
+function removePairErr(T,k){
+  const er=rosterBlock(T);if(er)return er;
+  const pr=T.pairs[k],R=T.rounds[T.round];
+  if(aliveIdx(T).filter(p=>!pr.includes(p)).length<4)return 'Нужно минимум 2 пары.';
+  if(!freshRound(R)&&R.matches.some(m=>!m.done&&m.t1.concat(m.t2).some(p=>pr.includes(p))))return 'Эта пара сейчас играет. Закончите игру или впишите другое имя в пару.';
+  return '';
+}
+function doRemovePair(T,k){
+  const pr=T.pairs[k],R=T.rounds[T.round],fresh=freshRound(R);
+  T.out=(T.out||[]).concat(pr);
+  if(T.format==='teammex'){
+    if(fresh){T.rounds.length=T.round;T.rounds.push(teamMexRound(T))}else R.sit=R.sit.filter(p=>!pr.includes(p));
+  }else{
+    const alive=aliveIdx(T),from=fresh?T.round:T.round+1;
+    if(!fresh)R.sit=R.sit.filter(p=>!pr.includes(p));
+    for(let r=from;r<T.rounds.length;r++)T.rounds[r].matches=T.rounds[r].matches.filter(m=>!m.t1.concat(m.t2).some(p=>pr.includes(p)));
+    T.rounds=T.rounds.filter((x,r)=>r<from||x.matches.length);
+    T.rounds.forEach((x,r)=>{if(r>=from)x.sit=alive.filter(p=>!x.matches.some(m=>m.t1.includes(p)||m.t2.includes(p)))});
+    T.cfg.total=T.rounds.length;
+    if(T.round>=T.rounds.length){T.round=Math.max(0,T.rounds.length-1);T.stage='results'}
+  }
+  touch(T);
+}
+function plSubmit(T){
+  const v=$('#pl-input').value,i=plUI.i,rn=plUI.mode==='rename',er=rn?nameErr(T,v,i):replaceErr(T,v);
+  if(er){$('#pl-err').textContent=er;return}
+  if(rn){T.players[i]=v.trim();touch(T);toast('Имя изменено')}else{doReplace(T,i,v);toast('Игрок заменён')}
+  plUI=null;render();
+}
+function renderPlayers(app,T){
+  if(plUI&&plUI.tid!==T.id)plUI=null;
+  const pairs=PAIRF(T.format),act=T.status==='active',by={};stats(T).st.forEach(s=>by[s.i]=s);
+  const blk=rosterBlock(T),gone=T.players.map((_,i)=>i).filter(i=>isOut(T,i));
+  const meta=i=>`${by[i].g} ${plural(by[i].g,'игра','игры','игр')} · Δ ${fmtD(by[i].d)}`;
+  const panel=i=>{
+    const mode=plUI.mode,nm=esc(T.players[i]);
+    if(mode==='rename'||mode==='replace'){
+      const rn=mode==='rename';
+      return `<div class="plpanel"><form id="plform" autocomplete="off">
+        <input class="textin" id="pl-input" maxlength="40" enterkeyhint="done" value="${rn?esc(T.players[i]):''}" placeholder="${rn?'Имя':'Имя нового игрока'}" aria-label="${rn?'Новое имя':'Имя нового игрока'}">
+        <div class="hint">${rn?(pairs?'Если вместо него играет другой, впишите его имя: результаты пары сохранятся.':'Имя изменится везде, в том числе в сыгранных матчах. Подходит, чтобы исправить опечатку.'):`Новый игрок займёт его место в оставшихся играх. Сыгранные матчи останутся за ${nm}, он будет в таблице внизу с пометкой «выбыл».`}</div>
+        <div class="err" id="pl-err"></div>
+        <div class="plbtns"><button type="submit" class="plbtn go">${rn?'Сохранить':'Заменить'}</button><button type="button" class="plbtn" data-a="pl-cancel">Отмена</button></div></form></div>`;
+    }
+    const dis=blk?'disabled':'';
+    return `<div class="plpanel"><div class="plbtns">
+      <button class="plbtn" data-a="pl-mode" data-m="rename">${pairs?'Изменить имя или заменить':'Изменить имя'}</button>
+      ${pairs?'':`<button class="plbtn" data-a="pl-mode" data-m="replace" ${dis}>Заменить на другого</button>`}
+      <button class="plbtn danger" data-a="pl-remove" ${dis}>${pairs?'Убрать пару':'Убрать из турнира'}</button></div>
+      ${blk?`<div class="hint">${blk}</div>`:''}<div class="err" id="pl-err"></div></div>`;
+  };
+  const row=(i,mark)=>{const open=plUI&&plUI.i===i;
+    return `<div class="pl"><button class="plhead" data-a="pl-open" data-i="${i}" aria-expanded="${!!open}"><span class="plnum">${mark}</span><span style="min-width:0"><span class="lb-name">${esc(T.players[i])}</span><span class="lb-meta" style="display:block">${meta(i)}</span></span><span class="plchev ${open?'o':''}">›</span></button>${open&&act?panel(i):''}</div>`};
+  const alive=aliveIdx(T);
+  const list=pairs?T.pairs.filter(pr=>!isOut(T,pr[0])).map((pr,n)=>`<div class="label" style="margin:${n?'14px':'0'} 0 0">Пара ${n+1}</div>`+pr.map(i=>row(i,'·')).join('')).join(''):alive.map((i,k)=>row(i,k+1)).join('');
+  const outs=gone.length?`<section class="card"><div class="label">Выбыли</div>${gone.map(i=>`<div class="pl"><div class="plhead static"><span class="plnum">–</span><span style="min-width:0"><span class="lb-name">${esc(T.players[i])}</span><span class="lb-meta" style="display:block">${meta(i)} · ${T.repl&&T.repl[i]!=null?'заменён на '+esc(T.players[T.repl[i]]):'убран из турнира'}</span></span><span></span></div></div>`).join('')}</section>`:'';
+  app.innerHTML=`${header(T,'<h1 class="big" style="margin-top:14px">Игроки</h1>')}
+  <div class="stack" style="margin-top:14px">
+    <div class="info">${pairs?`Играют пар: <b>${alive.length/2}</b>`:`Играют: <b>${alive.length}</b>`}${gone.length?` · выбыли: ${pairs?gone.length/2:gone.length}`:''}<br><span style="font-weight:500">Нажмите на ${pairs?'игрока':'игрока'}, чтобы изменить имя${pairs?'':', заменить или убрать из турнира'}.</span></div>
+    <section class="card">${list||'<div class="hint">Никого нет</div>'}</section>
+    ${outs}
+  </div>`;
+  const f=$('#plform');if(f){f.addEventListener('submit',e=>{e.preventDefault();plSubmit(T)});const inp=$('#pl-input');inp.focus();inp.select()}
+}
+
 /* ================= tournament flow ================= */
 function finishMatch(T,k){
   const R=T.rounds[T.round],m=R.matches[k];
@@ -2172,7 +2340,7 @@ function reopenMatch(T,ri,k){
   setTimeout(()=>{const el=$('#court-'+k);el&&el.scrollIntoView({behavior:'smooth',block:'center'})},50);
 }
 function copyResults(T){
-  const txt=T.sport==='tt'||T.sport==='pc'?ttCopyText(T):(()=>{const {st}=standings(T);return `${T.name} (${FMT[T.format]}, ${dateRu(T.finishedAt||T.createdAt)})\n`+st.map(s=>`${s.place}. ${s.name} — Δ ${fmtD(s.d)} (${s.f}:${s.a}, игр ${s.g})`).join('\n')})();
+  const txt=T.sport==='tt'||T.sport==='pc'?ttCopyText(T):(()=>{const {st}=standings(T);return `${T.name} (${FMT[T.format]}, ${dateRu(T.finishedAt||T.createdAt)})\n`+st.map(s=>`${s.place}. ${s.name}${s.out?' (выбыл)':''} — Δ ${fmtD(s.d)} (${s.f}:${s.a}, игр ${s.g})`).join('\n')})();
   const manual=()=>{sheet('Итоги турнира','Выделите текст и скопируйте его.',[],`<textarea id="copy-area" readonly style="width:100%;height:220px;border-radius:14px;border:2px solid var(--mist);padding:10px;font:600 14px/1.4 var(--f-body);color:var(--ink);background:var(--paper)">${esc(txt)}</textarea>`);const ta=$('#copy-area');if(ta){ta.focus();ta.select()}};
   if(TG){
     try{TG.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(txt));return}catch(e){}
@@ -2204,7 +2372,18 @@ document.addEventListener('click',e=>{
     case 'cystep':d.cycles=Math.min(4,Math.max(1,(d.cycles||1)+ +b.dataset.d));buzz();saveLocal();return render();
     case 'rstep':{const P=planFor(d);if(!P.ok)return;d.rounds=Math.min(Math.max(P.step,Math.floor(60/P.step)*P.step),Math.max(P.step,P.total+ +b.dataset.d*P.step));buzz();saveLocal();return render()}
     case 'start':return startTournament();
-    case 'tab':store.ui.tab=b.dataset.v;saveLocal();render();return scrollTo(0,0);
+    case 'pl-open':{const i=+b.dataset.i;plUI=plUI&&plUI.i===i&&plUI.tid===T.id?null:{tid:T.id,i,mode:null};return render()}
+    case 'pl-mode':plUI.mode=b.dataset.m;return render();
+    case 'pl-cancel':plUI.mode=null;return render();
+    case 'pl-remove':{
+      const i=plUI.i,pk=PAIRF(T.format)?T.pairs.findIndex(p=>p.includes(i)):-1,er=pk>=0?removePairErr(T,pk):removeErr(T,i);
+      if(er){$('#pl-err').textContent=er;return}
+      const nm=pk>=0?T.pairs[pk].map(p=>T.players[p]).join(' и '):T.players[i];
+      const txt=MEXF(T.format)?'Следующие пары будут составляться без '+(pk>=0?'неё':'него')+'. ':pk>=0?'Несыгранные игры этой пары отменятся, остальные пары сыграют друг с другом как раньше. ':'Оставшиеся раунды пересоберутся на '+(aliveIdx(T).length-1)+' игроков, игр у всех будет как можно поровну. ';
+      return sheet('Убрать '+nm+'?',txt+'Сыгранные матчи останутся в таблице, но без места.',[{label:'Убрать',kind:'danger',run:()=>{
+        if(pk>=0)doRemovePair(T,pk);else doRemove(T,i);
+        plUI=null;toast(pk>=0?'Пара убрана':'Игрок убран');render()}}]);}
+    case 'tab':plUI=null;store.ui.tab=b.dataset.v;saveLocal();render();return scrollTo(0,0);
     case 'sc':{const k=+b.dataset.m,s=b.dataset.s,m=T.rounds[T.round].matches[k];
       const c0=m['s'+s]===''?0:+m['s'+s];const v=Math.max(0,Math.min(T.cfg.limit,c0+ +b.dataset.d));
       buzz();return setScore(T,k,s,String(v),true);}
