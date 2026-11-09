@@ -767,9 +767,6 @@ function renderSetup(app){
       <div class="row" style="display:block">${roundsBlock}${timeBlock(d,P)}</div>
       <div class="err" id="e-cfg"></div>
     </section>
-    <section class="card"><div class="label">Показ игрокам</div><div class="seg">
-      <button data-a="dshare" data-v="1" class="${d.share!==false?'on':''}">Ссылка и QR</button><button data-a="dshare" data-v="0" class="${d.share===false?'on':''}">Не показывать</button></div>
-      <div class="hint">Игроки откроют ссылку в браузере и смогут только смотреть: кто с кем играет, счёт и таблицу. Имена и счёт хранятся в облаке Google, пока вы не остановите показ.</div></section>
     <button class="cta" data-a="start">Начать турнир ${IC.arrow}</button>
   </div>`;
   const f=$('#addform'),inp=$('#newname');
@@ -808,9 +805,8 @@ function startTournament(){
   else T.rounds=[mexicanoRound(T)];
   T.cfg.total=P.plan==='mex'?P.total:T.rounds.length;
   store.tournaments[id]=T;preview={key:'',rounds:null};
-  store.draft={...freshDraft(),players:d.players.slice(),sample:false,format:d.format,limit:d.limit,mode:d.mode,courts:d.courts,courtNums:(d.courtNums||[]).slice(),scheme:d.scheme,cycles:d.cycles||1,share:d.share};
+  store.draft={...freshDraft(),players:d.players.slice(),sample:false,format:d.format,limit:d.limit,mode:d.mode,courts:d.courts,courtNums:(d.courtNums||[]).slice(),scheme:d.scheme,cycles:d.cycles||1};
   touch(T);go('play',id,'play');wake();
-  if(d.share!==false)shareStart(T).then(()=>shareSheet(T),()=>toast('Не удалось включить ссылку. Её можно включить позже в меню'));
 }
 
 function renderTabbar(T){
@@ -2376,7 +2372,6 @@ document.addEventListener('click',e=>{
     case 'home':return go('home',null);
     case 'new':return go(SPORTS_ON.tt?'sport':'setup',null);
     case 'open':{const t=store.tournaments[b.dataset.id];return go(t.status==='finished'?'view':'play',t.id,'play')}
-    case 'dshare':d.share=b.dataset.v==='1';saveLocal();return render();
     case 'fmt':d.format=b.dataset.v;d.rounds=null;saveLocal();return render();
     case 'rm':d.players.splice(+b.dataset.i,1);d.sample=false;d.rounds=null;saveLocal();return render();
     case 'rmpair':d.players.splice(+b.dataset.i,2);d.sample=false;saveLocal();return render();
