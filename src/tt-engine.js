@@ -150,7 +150,7 @@ function ttKO(T,list,ph,third){
 function ttStartPlay(d,id){
   const n=ttEntrantCount(d),P=ttPlan(d);if(!P.ok)return {err:P.err};
   const T={id,sport:d.sport==='pc'?'pc':'tt',level:d.level||'simple',name:'',unit:d.unit,scheme:P.scheme,players:d.players.slice(),entrants:[],matches:[],seq:1,
-    cfg:{pts:d.pts,wins:{...d.wins},rwins:d.rwins,deuce:d.deuce,fmt:d.fmt,dec:d.dec,tables:P.tables,cycles:P.cycles||1,groupCount:P.groupCount||null,advance:P.advance||null,third:!!d.third,consolation:!!d.consolation,seeding:d.seeding},
+    cfg:{pts:d.pts,wins:{...d.wins},rwins:d.rwins,deuce:d.deuce,fmt:d.fmt,dec:d.dec,tables:P.tables,courtNums:d.sport==='pc'?courtNums(d,P.tables):undefined,cycles:P.cycles||1,groupCount:P.groupCount||null,advance:P.advance||null,third:!!d.third,consolation:!!d.consolation,seeding:d.seeding},
     stage:'play',status:'active',planned:P.matches};
   if(d.unit==='pair')for(let i=0;i<n;i++)T.entrants.push({name:d.players[2*i]+' / '+d.players[2*i+1],m:[2*i,2*i+1]});
   else T.players.forEach((p,i)=>T.entrants.push({name:p,m:[i]}));

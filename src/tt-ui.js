@@ -174,7 +174,7 @@ function renderTT(app,T){
   app.innerHTML=`${ttHeader(T,`<h1 class="big" style="margin-top:14px">${stageTitle}</h1>`)}
   <div class="stack" style="margin-top:14px">
     ${onTables.map(m=>`<article class="card court" id="tm-${m.id}">
-      <div class="court-head"><span class="court-tag ${V(T).cls}">${V(T).tag} ${m.table}</span><span class="hint" style="margin:0">${ttPhaseName(T,m)} · ${needText(T,m)}</span></div>
+      <div class="court-head"><span class="court-tag ${V(T).cls}">${V(T).tag} ${T.sport==='pc'?cNo(T,m.table-1):m.table}</span><span class="hint" style="margin:0">${ttPhaseName(T,m)} · ${needText(T,m)}</span></div>
       ${side(m,'a')}<div class="vs">VS</div>${side(m,'b')}
       <div class="court-foot"><div class="btnrow">
         <button class="finish" data-a="tt-score" data-m="${m.id}">Ввести счёт</button>
@@ -328,7 +328,7 @@ function renderTTTable(app,T){
   app.innerHTML=`${ttHeader(T,'<h1 class="big" style="margin-top:14px">Таблица</h1>')}<div class="stack" style="margin-top:14px">${body}</div>`;
 }
 function ttMatchLine(T,m){
-  const sc=m.bye?'—':m.wo?(m.wo==='ab'?'н/я':'н/я'):m.st==='done'?scoreText(T,m):m.table?`${V(T).Tag} ${m.table}`:'';
+  const sc=m.bye?'—':m.wo?(m.wo==='ab'?'н/я':'н/я'):m.st==='done'?scoreText(T,m):m.table?`${V(T).Tag} ${T.sport==='pc'?cNo(T,m.table-1):m.table}`:'';
   const summary=m.st==='done'&&!m.bye&&!m.wo?(()=>{const wa=winsA(T,m);return `${wa}:${m.games.length-wa}`})():m.wo?'w/o':m.bye?'пропуск':'';
   const nameA=`<span class="${m.win==='a'?'wn':''}">${esc(ttSideName(T,m,'a'))}</span>`,nameB=`<span class="r ${m.win==='b'?'wn':''}">${esc(ttSideName(T,m,'b'))}</span>`;
   const inner=`${nameA}<span class="sc ${m.st==='done'?'':'pending'}" title="${esc(sc)}">${summary||sc||'·'}</span>${nameB}`;

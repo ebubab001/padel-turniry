@@ -1,5 +1,5 @@
 /* ================= padel classic (FIP): screens ================= */
-function freshPCDraft(){return {sport:'pc',name:'',unit:'pair',scheme:null,players:[],deuce:'golden',fmt:'bo3',dec:'stb',tables:2,cycles:null,groupCount:null,advance:2,third:true,consolation:false,seeding:'random',wins:{g:1,ko:1,f:1},pts:11,rwins:1}}
+function freshPCDraft(){return {sport:'pc',name:'',courtNums:[],unit:'pair',scheme:null,players:[],deuce:'golden',fmt:'bo3',dec:'stb',tables:2,cycles:null,groupCount:null,advance:2,third:true,consolation:false,seeding:'random',wins:{g:1,ko:1,f:1},pts:11,rwins:1}}
 const pcDefaultName=()=>`Падел · классика · ${dateRu(Date.now())}`;
 const rulesBadge=(txt,cls)=>`<span class="rulesbadge ${cls||''}">${txt}</span>`;
 function renderPCSetup(app){
@@ -50,6 +50,7 @@ function renderPCSetup(app){
     <section class="card">
       ${ttStepper('pc-tables',P.tables,'Кортов',n>=2?`Максимум ${P.maxTables}${P.tables<P.maxTables?' — часть пар будет ждать':''}`:'')}
       ${P.ok?`<div class="info">Матчей: <b>${P.matches}</b> · примерно <b>${fmtMinutes(P.minutes)}</b> на ${P.tables} ${plural(P.tables,'корте','кортах','кортах')}</div>`:`<div class="warn">${P.err}</div>`}
+      ${courtNumsBlock(d,P.tables)}
     </section>
     <div class="err" id="e-cfg"></div>
     <button class="cta" data-a="pc-start">Начать турнир ${IC.arrow}</button>
@@ -59,16 +60,18 @@ function renderPCSetup(app){
   inp.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text')||'';if(/[\n,;+\/]/.test(t)){e.preventDefault();addNames(t)}});
   inp.addEventListener('input',()=>{$('#e-names').textContent=''});
   $('#f-name').addEventListener('input',e=>{d.name=e.target.value;saveLocal()});
+  wireCourtNums(d,P.tables);
 }
 function pcStartFromDraft(){
   const d=store.pcdraft,P=ttPlan(d);
   if(!P.ok){$('#e-cfg').textContent=P.err;$('#e-cfg').scrollIntoView({block:'center',behavior:'smooth'});return}
   if(d.players.length>64){$('#e-cfg').textContent='Максимум 32 пары';return}
+  const ce=courtNumsErr(d,P.tables);if(ce){$('#e-cn').textContent=ce;$('#e-cn').scrollIntoView({block:'center',behavior:'smooth'});return}
   const id=newId(),r=ttStartPlay(d,id);
   if(r.err){$('#e-cfg').textContent=r.err;return}
   const T=r.T;T.name=(d.name.trim()||pcDefaultName()).slice(0,60);T.createdAt=Date.now();T.updatedAt=Date.now();T.level='pro';
   store.tournaments[id]=T;
-  store.pcdraft={...freshPCDraft(),players:d.players.slice(),deuce:d.deuce,fmt:d.fmt,dec:d.dec,tables:d.tables,seeding:d.seeding,third:d.third,consolation:d.consolation,advance:d.advance};
+  store.pcdraft={...freshPCDraft(),players:d.players.slice(),deuce:d.deuce,fmt:d.fmt,dec:d.dec,tables:d.tables,courtNums:(d.courtNums||[]).slice(),seeding:d.seeding,third:d.third,consolation:d.consolation,advance:d.advance};
   touch(T);go('play',id,'play');wake();
 }
 /* ---------- score entry by sets ---------- */
@@ -91,7 +94,7 @@ function renderPCScore(app,T,m){
         <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" class="gin tbin" data-g="${i}" data-s="tb" value="${esc(v.tb||'')}" aria-label="Тай-брейк сета ${i+1}, ${nB}"></div>`}
     </div>`};
   app.innerHTML=`<div class="topbar"><button class="iconbtn" data-a="tt-scorex" aria-label="Назад">${IC.home}</button><div style="flex:1"></div></div>
-  <div class="eyebrow" style="margin-top:14px">${ttPhaseName(T,m)}${m.table?' · корт '+m.table:''}</div>
+  <div class="eyebrow" style="margin-top:14px">${ttPhaseName(T,m)}${m.table?' · корт '+cNo(T,m.table-1):''}</div>
   <h1 class="big">Счёт матча</h1>
   <p class="sub" style="margin:0 0 14px">${PC_FMT[c.fmt]}${need>1&&c.dec==='stb'?', при 1:1 — супер-тай-брейк до 10':''} · сет до ${S}, тай-брейк при ${S}:${S}</p>
   <section class="card">

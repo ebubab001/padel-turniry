@@ -60,6 +60,9 @@ input{font:inherit}
 .fixed{font-family:var(--f-display);font-weight:800;font-size:22px;background:var(--mist);padding:8px 14px;border-radius:14px;flex:none}
 .textin{width:100%;height:52px;border-radius:16px;border:2px solid var(--mist);padding:0 14px;color:var(--ink);background:var(--paper);font-weight:700;font-size:17px}
 .textin:focus{border-color:var(--court);outline:none}
+.cnums{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.cnum{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--mute)}
+.cnum .textin{width:64px;height:46px;text-align:center;font-size:18px;font-weight:800;padding:0}
 .addbox{display:flex;gap:8px;margin-top:12px}
 .addbox .textin{flex:1;min-width:0;height:50px;font-size:16px}
 .addbox button{width:50px;height:50px;border-radius:16px;background:var(--court);color:#fff;font-size:26px;font-weight:700;flex:none}
@@ -267,7 +270,7 @@ const IC={
 };
 
 /* ================= storage: phone first, cloud copy when available ================= */
-function freshDraft(){return {name:'',format:'americano',players:SAMPLE.slice(),sample:true,limit:24,mode:'sum',courts:2,rounds:null,scheme:'13',cycles:1}}
+function freshDraft(){return {name:'',format:'americano',players:SAMPLE.slice(),sample:true,limit:24,mode:'sum',courts:2,courtNums:[],rounds:null,scheme:'13',cycles:1}}
 function freshStore(){return {tournaments:{},draft:freshDraft(),ttdraft:freshTTDraft(),ui:{screen:'home',id:null,tab:'play'},unsynced:[]}}
 let store;
 function loadLocal(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
@@ -555,6 +558,17 @@ function restStep(n,c){const s=n-activeCount(n,c);return s?n/gcd(n,s):1}
 function maxCourts(d){const n=d.players.length;return Math.max(1,PAIRF(d.format)?Math.floor(Math.floor(n/2)/2):Math.floor(n/4))}
 /* The coach's chosen courts stay as set; what is used is capped by what the current players can fill */
 function effCourts(d){return Math.max(1,Math.min(d.courts||1,maxCourts(d)))}
+/* Номера кортов: корты можно назвать как в клубе (4, 8, 12). Пустое поле = номер по порядку. Игры раздаются по порядку списка */
+function cNo(T,i){const a=T.cfg&&T.cfg.courtNums;return a&&a[i]!=null?a[i]:i+1}
+function courtNums(d,n){const a=d.courtNums||[];return Array.from({length:n},(_,i)=>{const s=a[i]==null?'':String(a[i]);if(s==='')return i+1;const v=+s;return v>=1&&v<=99?v:NaN})}
+function courtNumsErr(d,n){const L=courtNums(d,n);if(L.some(isNaN))return 'Номер корта от 1 до 99';return new Set(L).size<L.length?'Номера кортов не должны повторяться':''}
+function courtNumsBlock(d,n,extra){
+  const a=d.courtNums||[],err=courtNumsErr(d,n);
+  return `<div class="label" style="margin-top:16px">Номера кортов</div>
+  <div class="hint" style="margin:0">Если корты в клубе называются не 1, 2, 3, впишите свои номера. Игры раздаются по порядку слева направо.${extra||''}</div>
+  <div class="cnums">${Array.from({length:n},(_,i)=>`<label class="cnum"><span>Корт</span><input class="textin" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-cn="${i}" value="${esc(a[i]==null?'':a[i])}" placeholder="${i+1}" autocomplete="off" aria-label="Номер ${i+1}-го корта"></label>`).join('')}</div>
+  <div class="err" id="e-cn">${err}</div>`}
+function wireCourtNums(d,n){app.querySelectorAll('input[data-cn]').forEach(el=>el.addEventListener('input',()=>{const v=el.value.replace(/\D/g,'').slice(0,2);if(v!==el.value)el.value=v;d.courtNums=d.courtNums||[];d.courtNums[+el.dataset.cn]=v;saveLocal();const e=$('#e-cn');if(e)e.textContent=courtNumsErr(d,n)}))}
 function planFor(d){
   const n=d.players.length,c=effCourts(d);
   if(n<4)return {ok:false};
@@ -728,6 +742,7 @@ function renderSetup(app){
     <section class="card">
       <div class="row"><div><div style="font-weight:800">Корты</div>${n>=4?`<div class="hint" style="margin:0">${effCourts(d)>=maxCourts(d)?`Максимум для ${n} ${plural(n,'игрока','игроков','игроков')}`:`Максимум ${maxCourts(d)} — сейчас часть ${PAIRF(d.format)?'пар':'игроков'} будет ждать`}</div>`:''}</div>
         <div class="stepper"><button data-a="cstep" data-d="-1" aria-label="Меньше кортов">−</button><span class="val">${effCourts(d)}</span><button data-a="cstep" data-d="1" aria-label="Больше кортов">+</button></div></div>
+      <div class="row" style="display:block">${courtNumsBlock(d,effCourts(d),MEXF(d.format)?' Самая сильная группа по таблице играет на первом корте.':'')}</div>
       <div class="row" style="display:block">${roundsBlock}</div>
       <div class="err" id="e-cfg"></div>
     </section>
@@ -738,6 +753,7 @@ function renderSetup(app){
   inp.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text')||'';if(/[\n,;+\/]/.test(t)){e.preventDefault();addNames(t)}});
   inp.addEventListener('input',()=>{$('#e-names').textContent=''});
   $('#f-name').addEventListener('input',e=>{d.name=e.target.value;saveLocal()});
+  wireCourtNums(d,effCourts(d));
 }
 function defaultName(d){return `${FMT[d.format]} · ${dateRu(Date.now())}`}
 
@@ -756,9 +772,11 @@ function startTournament(){
   if(n<4){$('#e-names').textContent='Нужно минимум 4 игрока';$('#e-names').scrollIntoView({block:'center',behavior:'smooth'});return}
   if(n>40){$('#e-names').textContent='Максимум 40 игроков';return}
   if(PAIRF(d.format)&&n%2){$('#e-names').textContent='Нужно чётное число игроков — у одного нет пары';$('#e-names').scrollIntoView({block:'center',behavior:'smooth'});return}
+  const ce=courtNumsErr(d,effCourts(d));
+  if(ce){$('#e-cn').textContent=ce;$('#e-cn').scrollIntoView({block:'center',behavior:'smooth'});return}
   const P=planFor(d),id=newId();
   const T={id,name:(d.name.trim()||defaultName(d)).slice(0,60),format:d.format,players:d.players.slice(),pairs:PAIRF(d.format)?pairsOf(d.players):undefined,
-    cfg:{limit:d.limit,mode:d.mode,courts:effCourts(d),scheme:d.scheme||'13',plan:P.plan,total:P.total},
+    cfg:{limit:d.limit,mode:d.mode,courts:effCourts(d),courtNums:courtNums(d,effCourts(d)),scheme:d.scheme||'13',plan:P.plan,total:P.total},
     rounds:[],round:0,stage:'play',status:'active',createdAt:Date.now(),updatedAt:Date.now()};
   if(P.plan==='full'||P.plan==='team')T.rounds=clone(preview.rounds);
 
@@ -766,7 +784,7 @@ function startTournament(){
   else T.rounds=[mexicanoRound(T)];
   T.cfg.total=P.plan==='mex'?P.total:T.rounds.length;
   store.tournaments[id]=T;preview={key:'',rounds:null};
-  store.draft={...freshDraft(),players:d.players.slice(),sample:false,format:d.format,limit:d.limit,mode:d.mode,courts:d.courts,scheme:d.scheme,cycles:d.cycles||1};
+  store.draft={...freshDraft(),players:d.players.slice(),sample:false,format:d.format,limit:d.limit,mode:d.mode,courts:d.courts,courtNums:(d.courtNums||[]).slice(),scheme:d.scheme,cycles:d.cycles||1};
   touch(T);go('play',id,'play');wake();
 }
 
@@ -814,14 +832,14 @@ function renderPlay(app,T){
     ${MEXF(T.format)&&T.round>0?`<div class="rest">${T.format==='teammex'?'Соперники подобраны':'Пары составлены'} по таблице после прошлого раунда</div>`:''}
     ${R.sit.length?`<div class="rest">Отдыхают: ${R.sit.map(i=>`<span class="p">${esc(T.players[i])}</span>`).join('')}</div>`:''}
     ${R.matches.map((m,k)=>`<article class="card court ${m.done?'isdone':''}" id="court-${k}">
-      <div class="court-head"><span class="court-tag">КОРТ ${k+1}</span>${m.done?`<span class="done-tag">${IC.check} Сыграно</span>`:''}</div>
+      <div class="court-head"><span class="court-tag">КОРТ ${cNo(T,k)}</span>${m.done?`<span class="done-tag">${IC.check} Сыграно</span>`:''}</div>
       ${team(m,k,1)}<div class="vs">VS</div>${team(m,k,2)}
       <div class="court-foot">
         <div class="err" id="err-${k}" style="margin:0 0 10px"></div>
         ${m.done?`<button class="textbtn" data-a="edit" data-m="${k}">Исправить счёт</button>`:`<button class="finish" data-a="finish" data-m="${k}">${IC.check} Закончить игру</button>`}
       </div></article>`).join('')}
     ${next?`<section class="card"><div class="label">Дальше · раунд ${T.round+2}</div>
-      ${next.matches.map((m,k)=>`<div class="mline"><span>${m.t1.map(i=>esc(T.players[i])).join(' / ')}</span><span class="sc pending">К${k+1}</span><span class="r">${m.t2.map(i=>esc(T.players[i])).join(' / ')}</span></div>`).join('')}</section>`
+      ${next.matches.map((m,k)=>`<div class="mline"><span>${m.t1.map(i=>esc(T.players[i])).join(' / ')}</span><span class="sc pending">К${cNo(T,k)}</span><span class="r">${m.t2.map(i=>esc(T.players[i])).join(' / ')}</span></div>`).join('')}</section>`
       :MEXF(T.format)&&T.rounds.length<total?`<div class="rest">Пары следующего раунда появятся, когда закончатся все игры этого</div>`:''}
   </div>`;
   app.querySelectorAll('.score input').forEach(el=>el.addEventListener('input',()=>setScore(T,+el.dataset.m,el.dataset.s,el.value,false)));
@@ -859,7 +877,7 @@ function renderGrid(app,T){
   ${T.rounds.map((r,i)=>`<section class="card" ${i===T.round&&T.stage==='play'?'style="outline:3px solid var(--ball)"':''}>
     <div class="round-title"><b>Раунд ${i+1}</b>${i===T.round&&T.stage==='play'?'<span class="pill-now">Сейчас</span>':''}</div>
     ${r.matches.map((m,k)=>{const inner=`<span>${m.t1.map(p=>esc(T.players[p])).join(' / ')}</span>
-      <span class="sc ${m.done?'':'pending'}">${m.done?m.s1+':'+m.s2:'К'+(k+1)}</span><span class="r">${m.t2.map(p=>esc(T.players[p])).join(' / ')}</span>`;
+      <span class="sc ${m.done?'':'pending'}">${m.done?m.s1+':'+m.s2:'К'+cNo(T,k)}</span><span class="r">${m.t2.map(p=>esc(T.players[p])).join(' / ')}</span>`;
       return m.done?`<button class="mline" data-a="gridedit" data-r="${i}" data-m="${k}">${inner}</button>`:`<div class="mline">${inner}</div>`}).join('')}
     ${r.sit.length?`<div class="hint">Отдыхают: ${r.sit.map(p=>esc(T.players[p])).join(', ')}</div>`:''}
   </section>`).join('')}
@@ -1250,7 +1268,7 @@ function ttKO(T,list,ph,third){
 function ttStartPlay(d,id){
   const n=ttEntrantCount(d),P=ttPlan(d);if(!P.ok)return {err:P.err};
   const T={id,sport:d.sport==='pc'?'pc':'tt',level:d.level||'simple',name:'',unit:d.unit,scheme:P.scheme,players:d.players.slice(),entrants:[],matches:[],seq:1,
-    cfg:{pts:d.pts,wins:{...d.wins},rwins:d.rwins,deuce:d.deuce,fmt:d.fmt,dec:d.dec,tables:P.tables,cycles:P.cycles||1,groupCount:P.groupCount||null,advance:P.advance||null,third:!!d.third,consolation:!!d.consolation,seeding:d.seeding},
+    cfg:{pts:d.pts,wins:{...d.wins},rwins:d.rwins,deuce:d.deuce,fmt:d.fmt,dec:d.dec,tables:P.tables,courtNums:d.sport==='pc'?courtNums(d,P.tables):undefined,cycles:P.cycles||1,groupCount:P.groupCount||null,advance:P.advance||null,third:!!d.third,consolation:!!d.consolation,seeding:d.seeding},
     stage:'play',status:'active',planned:P.matches};
   if(d.unit==='pair')for(let i=0;i<n;i++)T.entrants.push({name:d.players[2*i]+' / '+d.players[2*i+1],m:[2*i,2*i+1]});
   else T.players.forEach((p,i)=>T.entrants.push({name:p,m:[i]}));
@@ -1613,7 +1631,7 @@ function renderTT(app,T){
   app.innerHTML=`${ttHeader(T,`<h1 class="big" style="margin-top:14px">${stageTitle}</h1>`)}
   <div class="stack" style="margin-top:14px">
     ${onTables.map(m=>`<article class="card court" id="tm-${m.id}">
-      <div class="court-head"><span class="court-tag ${V(T).cls}">${V(T).tag} ${m.table}</span><span class="hint" style="margin:0">${ttPhaseName(T,m)} · ${needText(T,m)}</span></div>
+      <div class="court-head"><span class="court-tag ${V(T).cls}">${V(T).tag} ${T.sport==='pc'?cNo(T,m.table-1):m.table}</span><span class="hint" style="margin:0">${ttPhaseName(T,m)} · ${needText(T,m)}</span></div>
       ${side(m,'a')}<div class="vs">VS</div>${side(m,'b')}
       <div class="court-foot"><div class="btnrow">
         <button class="finish" data-a="tt-score" data-m="${m.id}">Ввести счёт</button>
@@ -1767,7 +1785,7 @@ function renderTTTable(app,T){
   app.innerHTML=`${ttHeader(T,'<h1 class="big" style="margin-top:14px">Таблица</h1>')}<div class="stack" style="margin-top:14px">${body}</div>`;
 }
 function ttMatchLine(T,m){
-  const sc=m.bye?'—':m.wo?(m.wo==='ab'?'н/я':'н/я'):m.st==='done'?scoreText(T,m):m.table?`${V(T).Tag} ${m.table}`:'';
+  const sc=m.bye?'—':m.wo?(m.wo==='ab'?'н/я':'н/я'):m.st==='done'?scoreText(T,m):m.table?`${V(T).Tag} ${T.sport==='pc'?cNo(T,m.table-1):m.table}`:'';
   const summary=m.st==='done'&&!m.bye&&!m.wo?(()=>{const wa=winsA(T,m);return `${wa}:${m.games.length-wa}`})():m.wo?'w/o':m.bye?'пропуск':'';
   const nameA=`<span class="${m.win==='a'?'wn':''}">${esc(ttSideName(T,m,'a'))}</span>`,nameB=`<span class="r ${m.win==='b'?'wn':''}">${esc(ttSideName(T,m,'b'))}</span>`;
   const inner=`${nameA}<span class="sc ${m.st==='done'?'':'pending'}" title="${esc(sc)}">${summary||sc||'·'}</span>${nameB}`;
@@ -1887,7 +1905,7 @@ document.addEventListener('click',e=>{
 });
 
 /* ================= padel classic (FIP): screens ================= */
-function freshPCDraft(){return {sport:'pc',name:'',unit:'pair',scheme:null,players:[],deuce:'golden',fmt:'bo3',dec:'stb',tables:2,cycles:null,groupCount:null,advance:2,third:true,consolation:false,seeding:'random',wins:{g:1,ko:1,f:1},pts:11,rwins:1}}
+function freshPCDraft(){return {sport:'pc',name:'',courtNums:[],unit:'pair',scheme:null,players:[],deuce:'golden',fmt:'bo3',dec:'stb',tables:2,cycles:null,groupCount:null,advance:2,third:true,consolation:false,seeding:'random',wins:{g:1,ko:1,f:1},pts:11,rwins:1}}
 const pcDefaultName=()=>`Падел · классика · ${dateRu(Date.now())}`;
 const rulesBadge=(txt,cls)=>`<span class="rulesbadge ${cls||''}">${txt}</span>`;
 function renderPCSetup(app){
@@ -1938,6 +1956,7 @@ function renderPCSetup(app){
     <section class="card">
       ${ttStepper('pc-tables',P.tables,'Кортов',n>=2?`Максимум ${P.maxTables}${P.tables<P.maxTables?' — часть пар будет ждать':''}`:'')}
       ${P.ok?`<div class="info">Матчей: <b>${P.matches}</b> · примерно <b>${fmtMinutes(P.minutes)}</b> на ${P.tables} ${plural(P.tables,'корте','кортах','кортах')}</div>`:`<div class="warn">${P.err}</div>`}
+      ${courtNumsBlock(d,P.tables)}
     </section>
     <div class="err" id="e-cfg"></div>
     <button class="cta" data-a="pc-start">Начать турнир ${IC.arrow}</button>
@@ -1947,16 +1966,18 @@ function renderPCSetup(app){
   inp.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text')||'';if(/[\n,;+\/]/.test(t)){e.preventDefault();addNames(t)}});
   inp.addEventListener('input',()=>{$('#e-names').textContent=''});
   $('#f-name').addEventListener('input',e=>{d.name=e.target.value;saveLocal()});
+  wireCourtNums(d,P.tables);
 }
 function pcStartFromDraft(){
   const d=store.pcdraft,P=ttPlan(d);
   if(!P.ok){$('#e-cfg').textContent=P.err;$('#e-cfg').scrollIntoView({block:'center',behavior:'smooth'});return}
   if(d.players.length>64){$('#e-cfg').textContent='Максимум 32 пары';return}
+  const ce=courtNumsErr(d,P.tables);if(ce){$('#e-cn').textContent=ce;$('#e-cn').scrollIntoView({block:'center',behavior:'smooth'});return}
   const id=newId(),r=ttStartPlay(d,id);
   if(r.err){$('#e-cfg').textContent=r.err;return}
   const T=r.T;T.name=(d.name.trim()||pcDefaultName()).slice(0,60);T.createdAt=Date.now();T.updatedAt=Date.now();T.level='pro';
   store.tournaments[id]=T;
-  store.pcdraft={...freshPCDraft(),players:d.players.slice(),deuce:d.deuce,fmt:d.fmt,dec:d.dec,tables:d.tables,seeding:d.seeding,third:d.third,consolation:d.consolation,advance:d.advance};
+  store.pcdraft={...freshPCDraft(),players:d.players.slice(),deuce:d.deuce,fmt:d.fmt,dec:d.dec,tables:d.tables,courtNums:(d.courtNums||[]).slice(),seeding:d.seeding,third:d.third,consolation:d.consolation,advance:d.advance};
   touch(T);go('play',id,'play');wake();
 }
 /* ---------- score entry by sets ---------- */
@@ -1979,7 +2000,7 @@ function renderPCScore(app,T,m){
         <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" class="gin tbin" data-g="${i}" data-s="tb" value="${esc(v.tb||'')}" aria-label="Тай-брейк сета ${i+1}, ${nB}"></div>`}
     </div>`};
   app.innerHTML=`<div class="topbar"><button class="iconbtn" data-a="tt-scorex" aria-label="Назад">${IC.home}</button><div style="flex:1"></div></div>
-  <div class="eyebrow" style="margin-top:14px">${ttPhaseName(T,m)}${m.table?' · корт '+m.table:''}</div>
+  <div class="eyebrow" style="margin-top:14px">${ttPhaseName(T,m)}${m.table?' · корт '+cNo(T,m.table-1):''}</div>
   <h1 class="big">Счёт матча</h1>
   <p class="sub" style="margin:0 0 14px">${PC_FMT[c.fmt]}${need>1&&c.dec==='stb'?', при 1:1 — супер-тай-брейк до 10':''} · сет до ${S}, тай-брейк при ${S}:${S}</p>
   <section class="card">
