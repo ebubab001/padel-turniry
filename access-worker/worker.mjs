@@ -44,7 +44,14 @@ async function telegram(env, userId, fetcher) {
     signal: AbortSignal.timeout(8000)
   });
   const data = await response.json();
-  if (!response.ok || !data.ok) throw new Error('telegram_unavailable');
+  if (!response.ok || !data.ok) {
+    const description = String(data.description || '').toLowerCase();
+    const reason = data.error_code === 401 ? 'bot_token_invalid' : data.error_code === 429 ? 'telegram_rate_limit' :
+      description.includes('chat not found') ? 'channel_not_found' :
+      description.includes('user not found') ? 'user_not_found' :
+      description.includes('member list') ? 'member_list_unavailable' : 'telegram_api_error';
+    throw Object.assign(new Error('telegram_unavailable'), { reason });
+  }
   return data.result;
 }
 export async function handle(request, env, fetcher = fetch) {
@@ -100,7 +107,8 @@ export async function handle(request, env, fetcher = fetch) {
     return cors(json({ allowed: isMember(member), channelUrl: url }));
   } catch (error) {
     // Never log request data or Telegram errors: they may contain the bot token.
-    return cors(json({ error: error instanceof SyntaxError ? 'invalid_request' : 'temporarily_unavailable' },
+    return cors(json({ error: error instanceof SyntaxError ? 'invalid_request' : 'temporarily_unavailable',
+      reason: error.reason || (error instanceof SyntaxError ? 'invalid_json' : error.name) },
       error instanceof SyntaxError ? 400 : 503));
   }
 }
