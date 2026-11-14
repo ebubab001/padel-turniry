@@ -111,7 +111,8 @@ function renderTTSetup(app){
   $('#f-name').addEventListener('input',e=>{d0.name=e.target.value;saveLocal()});
 }
 const ttDefaultName=()=>`Настольный теннис · ${dateRu(Date.now())}`;
-function ttStartFromDraft(){
+async function ttStartFromDraft(){
+  if(!await requireTournamentAccess())return;
   const d=ttEff(store.ttdraft),P=ttPlan(d);
   if(!P.ok){$('#e-cfg').textContent=P.err;$('#e-cfg').scrollIntoView({block:'center',behavior:'smooth'});return}
   if(d.players.length>48){$('#e-cfg').textContent='Максимум 48 игроков';return}

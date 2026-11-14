@@ -62,7 +62,8 @@ function renderPCSetup(app){
   $('#f-name').addEventListener('input',e=>{d.name=e.target.value;saveLocal()});
   wireCourtNums(d,P.tables);
 }
-function pcStartFromDraft(){
+async function pcStartFromDraft(){
+  if(!await requireTournamentAccess())return;
   const d=store.pcdraft,P=ttPlan(d);
   if(!P.ok){$('#e-cfg').textContent=P.err;$('#e-cfg').scrollIntoView({block:'center',behavior:'smooth'});return}
   if(d.players.length>64){$('#e-cfg').textContent='Максимум 32 пары';return}

@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "padla-tour-access",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-14",
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "vars": {
+    "CHANNEL_ID": "-1004335010847",
+    "CHANNEL_URL": "",
+    "ALLOWED_ORIGINS": "https://ebubab001.github.io"
+  }
+}

@@ -9,6 +9,9 @@ cd "$(dirname "$0")"
     '<script src="https://telegram.org/js/telegram-web-app.js"></script>' \
     '<style>html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>' \
     '</head><body>'
+  printf '%s\n' '<script>'
+  cat access-config.js access-gate.js
+  printf '%s\n' '</script>'
   cat padel-americano.html
   printf '%s\n' '</body></html>'
 } > index.html
