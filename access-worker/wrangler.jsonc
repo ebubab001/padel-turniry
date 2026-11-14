@@ -7,7 +7,7 @@
   "observability": { "enabled": false },
   "vars": {
     "CHANNEL_ID": "-1004335010847",
-    "CHANNEL_URL": "",
+    "CHANNEL_URL": "https://t.me/mikhailrad1n",
     "ALLOWED_ORIGINS": "https://ebubab001.github.io"
   }
 }
